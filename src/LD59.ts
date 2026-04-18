@@ -9,7 +9,8 @@ import {
     TextDisp,
     TimerSystem
 } from "lagom-engine";
-import { SoundManager } from "./util/SoundManager";
+import {SoundManager} from "./util/SoundManager";
+import {Lander} from "./Lander";
 
 class TitleScene extends Scene {
     onAdded() {
@@ -49,12 +50,14 @@ class MainScene extends Scene {
             }),
         );
 
+        this.addEntity(new Lander(100, 100));
+
         // Game.audio.startMusic("music", true);
     }
 }
 
 export class LD59 extends Game {
-    startScene = () => new TitleScene(this);
+    startScene = () => new MainScene(this);
     resourceLoad = async () => {
         await Game.resourceLoader.autoLoad();
         console.log("loaded all resources");
