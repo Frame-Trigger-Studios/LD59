@@ -1,6 +1,6 @@
 import {Entity, Game, RectSatCollider, Sprite, TiledMap, TiledMapLoader} from "lagom-engine";
 import levels from "./assets/Levels.json";
-import {Lander} from "./Lander";
+import {LanderPlaceholder} from "./Lander";
 import {LandingPad} from "./LandingPad";
 import {Layers} from "./LD59";
 
@@ -44,7 +44,7 @@ export class LevelLoader extends Entity {
 
             if (tileId === 28) {
                 // Player
-                this.scene.addEntity(new Lander(x, y));
+                this.scene.addEntity(new LanderPlaceholder(x, y));
             } else if (tileId === 29) {
                 // Landing pad
                 this.scene.addEntity(new LandingPad(x, y));

@@ -1,9 +1,9 @@
 import {
-    ActionOnPress,
     CollisionMatrix,
     Entity,
     FrameTriggerSystem,
     Game,
+    Key,
     Log,
     LogLevel,
     SatCollisionSystem,
@@ -15,6 +15,7 @@ import {
 import {SoundManager} from "./util/SoundManager";
 import {LevelLoader} from "./LevelLoad";
 import {ClickDetectionSystem, ClickSpawnSystem} from "./antenna";
+import {ActionOnPress} from "./util/ActionOnPress";
 
 export enum Layers {
     SHIP,
@@ -58,12 +59,27 @@ class MainScene extends Scene {
 
         this.addSystem(new SimplePhysics());
 
-        this.addGUIEntity(new Entity("main scene")).addComponent(
-            new TextDisp(100, 10, "MAIN SCENE", {
-                fontFamily: "pixeloid",
+        const text = this.addGUIEntity(new Entity("title"));
+        text.addComponent(
+            new TextDisp(Game.GAME_WIDTH / 2, 20, "Click to Add an Antenna", {
+                fontFamily: "retro",
                 fill: 0xffffff,
             }),
-        );
+        ).pixiObj.anchor.set(0.5);
+        ;
+        text.addComponent(
+            new TextDisp(Game.GAME_WIDTH / 2, Game.GAME_HEIGHT - 20, "Press Space to Start", {
+                fontFamily: "retro",
+                fill: 0xffffff,
+                align: "center"
+            }),
+        ).pixiObj.anchor.set(0.5);
+        this.addSystem(new ActionOnPress((system) => {
+            this.getEntityWithName("lander_placeholder")?.destroy();
+            text.destroy();
+            system.destroy();
+
+        }, [Key.Space]));
 
         const matrix = new CollisionMatrix();
         matrix.addCollision(Layers.SHIP, Layers.SOLIDS);

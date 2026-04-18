@@ -9,6 +9,22 @@ class Phys {
     static THRUST = 0.00004;
 }
 
+export class LanderPlaceholder extends Entity {
+    constructor(x: number, y: number) {
+        super("lander_placeholder", x, y);
+    }
+
+    onAdded() {
+        super.onAdded();
+        this.addComponent(new Sprite(Game.resourceLoader.get("lander").tileIdx(0), {xAnchor: 0.5, yAnchor: 0.5}));
+    }
+
+    onRemoved() {
+        super.onRemoved();
+        this.scene.addEntity(new Lander(this.transform.x, this.transform.y));
+    }
+}
+
 export class Lander extends Entity {
 
     constructor(x: number, y: number) {

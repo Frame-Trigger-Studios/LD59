@@ -11,6 +11,5 @@ export class LandingPad extends Entity {
 
         this.addComponent(new Sprite(Game.resourceLoader.get("landing_pad").tileIdx(0), {xAnchor: 0.5, yAnchor: 0.5}))
         this.addComponent(new RectSatCollider({layer: Layers.PAD, xOff: -8, yOff: 6, width: 16, height: 2}))
-        this.addComponent(new RenderRect({xOff: -8, yOff: 6, width: 16, height: 2}))
     }
 }
