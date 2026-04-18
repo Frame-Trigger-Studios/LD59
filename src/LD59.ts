@@ -16,9 +16,12 @@ import {Lander} from "./Lander";
 
 export enum Layers {
     SHIP,
+    ANTENNA,
+    ANTENNA_DESTROY,
     SOLIDS,
+    CLICK,
 }
-import {Antenna} from "./antenna";
+import {ClickSpawnSystem, Antenna, ClickDetectionSystem} from "./antenna";
 
 class TitleScene extends Scene {
     onAdded() {
@@ -60,9 +63,12 @@ class MainScene extends Scene {
 
         const matrix = new CollisionMatrix();
         matrix.addCollision(Layers.SHIP, Layers.SOLIDS);
+        matrix.addCollision(Layers.CLICK, Layers.ANTENNA_DESTROY);
 
         this.addGlobalSystem(new SatCollisionSystem(matrix));
+        this.addGlobalSystem(new ClickSpawnSystem());
 
+        this.addSystem(new ClickDetectionSystem());
 
         this.addEntity(new Lander(100, 100));
 
