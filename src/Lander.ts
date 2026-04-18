@@ -1,11 +1,12 @@
-import {Entity, Game, Key, MathUtil, newSystem, Rigidbody, SimplePhysicsBody, Sprite, TextDisp} from "lagom-engine";
+import {CircleSatCollider, Entity, Game, Key, MathUtil, Rigidbody, SimplePhysicsBody, Sprite} from "lagom-engine";
 import {InRange} from "./Signal";
+import {Layers} from "./LD59";
 
 
 class Phys {
     static GRAVITY = 0.000015;
     static ROT_SPEED = 0.0008;
-    static THRUST = 0.00006;
+    static THRUST = 0.00004;
 }
 
 export class Lander extends Entity {
@@ -53,6 +54,25 @@ export class Lander extends Entity {
         });
 
         this.addComponent(new Rigidbody());
-        this.addComponent(new SimplePhysicsBody({angCap: 0.08, angDrag: 0.005, linCap: 6}));
+        this.addComponent(new SimplePhysicsBody({angCap: 0.08, angDrag: 0.005, linCap: 1, linDrag: 0.00005}));
+
+        const col = this.addComponent(new CircleSatCollider({layer: Layers.SHIP, radius: 6}));
+        col.onTriggerWithLayer(Layers.PAD, (caller, data) => {
+            // Check if it was a safe landing or not.
+            const ang = Math.abs(caller.parent.transform.angle % 360);
+            const phys = caller.parent.getComponent<SimplePhysicsBody>(SimplePhysicsBody);
+            const yVel = phys?.yVel ?? 1000;
+            const xVel = phys?.xVel ?? 1000;
+
+            if (ang < 15 && yVel < 0.5 && Math.abs(xVel) < 0.2) {
+                console.log("SAFE")
+
+            } else {
+                // console.log("a", ang, "x", xVel, "y", yVel);
+            }
+
+            caller.parent.getComponent(Rigidbody)?.destroy();
+            caller.parent.getComponent(SimplePhysicsBody)?.destroy();
+        });
     }
 }

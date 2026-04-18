@@ -67,6 +67,7 @@ class MainScene extends Scene {
 
         const matrix = new CollisionMatrix();
         matrix.addCollision(Layers.SHIP, Layers.SOLIDS);
+        matrix.addCollision(Layers.SHIP, Layers.PAD);
         matrix.addCollision(Layers.CLICK, Layers.ANTENNA_DESTROY);
 
         this.addGlobalSystem(new SatCollisionSystem(matrix));
