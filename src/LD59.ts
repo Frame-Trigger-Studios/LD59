@@ -13,10 +13,11 @@ import {
     TimerSystem
 } from "lagom-engine";
 import {SoundManager} from "./util/SoundManager";
-import {Lander} from "./Lander";
+import {LevelLoader} from "./LevelLoad";
 
 export enum Layers {
     SHIP,
+    PAD,
     SOLIDS,
 }
 
@@ -67,7 +68,7 @@ class MainScene extends Scene {
         this.addGlobalSystem(new SatCollisionSystem(matrix));
 
 
-        this.addEntity(new Lander(100, 100));
+        this.addEntity(new LevelLoader(1));
 
         // Game.audio.startMusic("music", true);
     }
