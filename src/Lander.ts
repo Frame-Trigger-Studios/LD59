@@ -1,4 +1,5 @@
 import {Entity, Game, Key, MathUtil, newSystem, Rigidbody, SimplePhysicsBody, Sprite} from "lagom-engine";
+import {InRange} from "./Signal";
 
 
 class Phys {
@@ -27,8 +28,10 @@ export class Lander extends Entity {
             body.pendingRotation = 0;
         }))
 
+        this.addComponent(new InRange());
+
         // Player mover
-        this.getScene().addFnSystem(newSystem([SimplePhysicsBody], (delta, entity, body) => {
+        this.getScene().addFnSystem(newSystem([SimplePhysicsBody, InRange], (delta, entity, body, inRange) => {
             if (Game.keyboard.isKeyDown(Key.KeyA)) {
                 body.rotate(MathUtil.degToRad(delta * -Phys.ROT_SPEED));
             }
