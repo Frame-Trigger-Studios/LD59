@@ -75,8 +75,6 @@ class MainScene extends Scene {
 
         this.addEntity(new Lander(100, 100));
 
-        this.addEntity(new Antenna(100, 100, 1));
-        this.addEntity(new Antenna(400, 100, 1));
 
         // Game.audio.startMusic("music", true);
     }
