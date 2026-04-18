@@ -10,6 +10,7 @@ import {
     TimerSystem
 } from "lagom-engine";
 import { SoundManager } from "./util/SoundManager";
+import {Antenna} from "./antenna";
 
 class TitleScene extends Scene {
     onAdded() {
@@ -48,6 +49,9 @@ class MainScene extends Scene {
                 fill: 0xffffff,
             }),
         );
+
+        this.addEntity(new Antenna(100, 100, 1));
+        this.addEntity(new Antenna(400, 100, 1));
 
         // Game.audio.startMusic("music", true);
     }
