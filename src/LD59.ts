@@ -8,6 +8,7 @@ import {
     LogLevel,
     SatCollisionSystem,
     Scene,
+    SimplePhysics,
     TextDisp,
     TimerSystem
 } from "lagom-engine";
@@ -50,6 +51,8 @@ class MainScene extends Scene {
         this.addGUIEntity(new SoundManager());
         this.addGlobalSystem(new TimerSystem());
         this.addGlobalSystem(new FrameTriggerSystem());
+
+        this.addSystem(new SimplePhysics());
 
         this.addGUIEntity(new Entity("main scene")).addComponent(
             new TextDisp(100, 10, "MAIN SCENE", {
