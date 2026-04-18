@@ -17,10 +17,13 @@ import {LevelLoader} from "./LevelLoad";
 
 export enum Layers {
     SHIP,
+    ANTENNA,
+    ANTENNA_DESTROY,
     PAD,
     SOLIDS,
+    CLICK,
 }
-
+import {ClickSpawnSystem, Antenna, ClickDetectionSystem} from "./antenna";
 
 class TitleScene extends Scene {
     onAdded() {
@@ -64,11 +67,15 @@ class MainScene extends Scene {
 
         const matrix = new CollisionMatrix();
         matrix.addCollision(Layers.SHIP, Layers.SOLIDS);
+        matrix.addCollision(Layers.CLICK, Layers.ANTENNA_DESTROY);
 
         this.addGlobalSystem(new SatCollisionSystem(matrix));
+        this.addGlobalSystem(new ClickSpawnSystem());
 
+        this.addSystem(new ClickDetectionSystem());
 
         this.addEntity(new LevelLoader(1));
+
 
         // Game.audio.startMusic("music", true);
     }
