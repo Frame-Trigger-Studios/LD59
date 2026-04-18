@@ -1,15 +1,23 @@
 import {
     ActionOnPress,
+    CollisionMatrix,
     Entity,
     FrameTriggerSystem,
     Game,
     Log,
     LogLevel,
+    SatCollisionSystem,
     Scene,
     TextDisp,
     TimerSystem
 } from "lagom-engine";
-import { SoundManager } from "./util/SoundManager";
+import {SoundManager} from "./util/SoundManager";
+import {Lander} from "./Lander";
+
+export enum Layers {
+    SHIP,
+    SOLIDS,
+}
 import {Antenna} from "./antenna";
 
 class TitleScene extends Scene {
@@ -50,6 +58,14 @@ class MainScene extends Scene {
             }),
         );
 
+        const matrix = new CollisionMatrix();
+        matrix.addCollision(Layers.SHIP, Layers.SOLIDS);
+
+        this.addGlobalSystem(new SatCollisionSystem(matrix));
+
+
+        this.addEntity(new Lander(100, 100));
+
         this.addEntity(new Antenna(100, 100, 1));
         this.addEntity(new Antenna(400, 100, 1));
 
@@ -58,7 +74,7 @@ class MainScene extends Scene {
 }
 
 export class LD59 extends Game {
-    startScene = () => new TitleScene(this);
+    startScene = () => new MainScene(this);
     resourceLoad = async () => {
         await Game.resourceLoader.autoLoad();
         console.log("loaded all resources");
