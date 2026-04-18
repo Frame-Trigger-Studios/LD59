@@ -1,16 +1,24 @@
 import {
     ActionOnPress,
+    CollisionMatrix,
     Entity,
     FrameTriggerSystem,
     Game,
     Log,
     LogLevel,
+    SatCollisionSystem,
     Scene,
     TextDisp,
     TimerSystem
 } from "lagom-engine";
 import {SoundManager} from "./util/SoundManager";
 import {Lander} from "./Lander";
+
+export enum Layers {
+    SHIP,
+    SOLIDS,
+}
+
 
 class TitleScene extends Scene {
     onAdded() {
@@ -49,6 +57,12 @@ class MainScene extends Scene {
                 fill: 0xffffff,
             }),
         );
+
+        const matrix = new CollisionMatrix();
+        matrix.addCollision(Layers.SHIP, Layers.SOLIDS);
+
+        this.addGlobalSystem(new SatCollisionSystem(matrix));
+
 
         this.addEntity(new Lander(100, 100));
 

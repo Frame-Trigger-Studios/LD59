@@ -1,4 +1,11 @@
-import {Entity, Game, Sprite} from "lagom-engine";
+import {Component, Entity, Game, newSystem, Sprite} from "lagom-engine";
+
+
+class AddGravity extends Component {
+    static AMT = 0.05;
+}
+
+// class
 
 export class Lander extends Entity {
 
@@ -11,5 +18,11 @@ export class Lander extends Entity {
         super.onAdded();
 
         this.addComponent(new Sprite(Game.resourceLoader.get("lander").tileIdx(0)));
+
+        this.addComponent(new AddGravity());
+
+        this.getScene().addFnSystem(newSystem([AddGravity], (delta, entity, components) => {
+            entity.transform.y += AddGravity.AMT * delta;
+        }))
     }
 }
