@@ -1,4 +1,14 @@
-import { ActionOnPress, Entity, FrameTriggerSystem, Game, Log, LogLevel, Scene, TextDisp, TimerSystem } from "lagom-engine";
+import {
+    ActionOnPress,
+    Entity,
+    FrameTriggerSystem,
+    Game,
+    Log,
+    LogLevel,
+    Scene,
+    TextDisp,
+    TimerSystem
+} from "lagom-engine";
 import { SoundManager } from "./util/SoundManager";
 
 class TitleScene extends Scene {
@@ -43,7 +53,7 @@ class MainScene extends Scene {
     }
 }
 
-export class GameTemplate extends Game {
+export class LD59 extends Game {
     startScene = () => new TitleScene(this);
     resourceLoad = async () => {
         await Game.resourceLoader.autoLoad();
