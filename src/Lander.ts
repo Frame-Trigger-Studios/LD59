@@ -1,4 +1,4 @@
-import {Entity, Game, Key, MathUtil, newSystem, Rigidbody, SimplePhysicsBody, Sprite} from "lagom-engine";
+import {Entity, Game, Key, MathUtil, newSystem, Rigidbody, SimplePhysicsBody, Sprite, TextDisp} from "lagom-engine";
 import {InRange} from "./Signal";
 
 
@@ -19,19 +19,19 @@ export class Lander extends Entity {
 
         this.addComponent(new Sprite(Game.resourceLoader.get("lander").tileIdx(0), {xAnchor: 0.5, yAnchor: 0.5}));
 
-        this.getScene().addFnSystem(newSystem([Rigidbody], (delta, entity, body) => {
+        this.getScene().addFnSystem([Rigidbody], (delta, entity, body) => {
             entity.transform.x += body.pendingX;
             entity.transform.y += body.pendingY;
             entity.transform.rotation += body.pendingRotation;
             body.pendingX = 0;
             body.pendingY = 0;
             body.pendingRotation = 0;
-        }))
+        })
 
         this.addComponent(new InRange());
 
         // Player mover
-        this.getScene().addFnSystem(newSystem([SimplePhysicsBody, InRange], (delta, entity, body, inRange) => {
+        this.getScene().addFnSystem([SimplePhysicsBody, InRange], (delta, entity, body: SimplePhysicsBody, inRange: InRange) => {
             if (Game.keyboard.isKeyDown(Key.KeyA)) {
                 body.rotate(MathUtil.degToRad(delta * -Phys.ROT_SPEED));
             }
@@ -50,7 +50,7 @@ export class Lander extends Entity {
             }
 
             body.move(0, Phys.GRAVITY * delta);
-        }));
+        });
 
         this.addComponent(new Rigidbody());
         this.addComponent(new SimplePhysicsBody({angCap: 0.08, angDrag: 0.005, linCap: 6}));
