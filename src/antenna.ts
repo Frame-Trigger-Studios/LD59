@@ -8,7 +8,8 @@ import {
     GlobalSystem,
     RenderCircle,
     RenderRect,
-    System, Timer
+    System,
+    Timer
 } from "lagom-engine";
 import {Layers} from "./LD59";
 
@@ -25,8 +26,17 @@ export class Antenna extends Entity {
 
         const radius = 10;
         const deleteButton = this.addChild(new Entity("deleteButton", 0, 0, Layers.ANTENNA_DESTROY));
-        deleteButton.addComponent(new RenderCircle({radius: radius, xOff: width / 2, yOff: height + radius + 10}, 0xffffff, 0xff0000));
-        deleteButton.addComponent(new CircleSatCollider({radius: radius, xOff: width / 2, yOff: height + radius + 10, layer: Layers.ANTENNA_DESTROY}));
+        deleteButton.addComponent(new RenderCircle({
+            radius: radius,
+            xOff: width / 2,
+            yOff: height + radius + 10
+        }, 0xffffff, 0xff0000));
+        deleteButton.addComponent(new CircleSatCollider({
+            radius: radius,
+            xOff: width / 2,
+            yOff: height + radius + 10,
+            layer: Layers.ANTENNA_DESTROY
+        }));
     }
 }
 
@@ -43,20 +53,21 @@ class ClickDetector extends Entity {
                 this.destroy();
             });
         this.addComponent(new Timer(20, null, false)).onTrigger.register(caller => {
-            const pos = Game.mouse.canvasPos();
+            const pos = Game.mouse.canvasPos().divide(2);
             this.getScene().addEntity(new Antenna(pos.x, pos.y, Layers.ANTENNA));
         })
     }
 }
 
-class ClickAndDestroy extends Component {}
+class ClickAndDestroy extends Component {
+}
 
 export class ClickSpawnSystem extends GlobalSystem<[]> {
     types: [] = [];
 
     update(delta: number): void {
         if (Game.mouse.isButtonPressed(Button.LEFT)) {
-            const pos = Game.mouse.canvasPos();
+            const pos = Game.mouse.canvasPos().divide(2);
             this.getScene().addEntity(new ClickDetector(pos.x, pos.y, Layers.CLICK));
         }
     }

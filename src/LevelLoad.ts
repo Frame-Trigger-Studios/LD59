@@ -39,6 +39,8 @@ export class LevelLoader extends Entity {
 
         loader.loadFn(`Level${this.levelId}`, (tileId, x, y) => {
             tileId = tileId - 1;
+            x = x + 8;
+            y = y + 8;
 
             if (tileId === 28) {
                 // Player
