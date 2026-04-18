@@ -14,6 +14,7 @@ import {
 } from "lagom-engine";
 import {SoundManager} from "./util/SoundManager";
 import {LevelLoader} from "./LevelLoad";
+import {ClickDetectionSystem, ClickSpawnSystem} from "./antenna";
 
 export enum Layers {
     SHIP,
@@ -23,7 +24,6 @@ export enum Layers {
     SOLIDS,
     CLICK,
 }
-import {ClickSpawnSystem, Antenna, ClickDetectionSystem} from "./antenna";
 
 class TitleScene extends Scene {
     onAdded() {
@@ -90,9 +90,9 @@ export class LD59 extends Game {
 
     constructor() {
         super({
-            width: 512,
-            height: 512,
-            resolution: 1,
+            width: 640,
+            height: 360,
+            resolution: 2,
             backgroundColor: 0x200140,
         });
 
