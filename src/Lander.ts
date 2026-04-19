@@ -17,7 +17,6 @@ import {
 } from "lagom-engine";
 import {GameState, Layers, LD59} from "./LD59";
 import {GameTimerSystem, Score, ScoreDisplay, TimerText} from "./scoring/Scoring";
-import {SoundManager} from "./util/SoundManager";
 
 
 class Phys {
@@ -60,11 +59,17 @@ export class Lander extends Entity {
         const fireSpr = this.addComponent(new AnimatedSpriteController(0, [{
             // Blank
             id: 0,
-            textures: [fireTex.tileIdx(4)]
+            textures: [fireTex.tileIdx(4)],
+            events: {
+                0: () => LD59.audio.stop("thrusters")
+            }
         }, {
             // Fire
             id: 1,
             textures: fireTex.tileSlice(0, 3),
+            events: {
+                0: () => LD59.audio.play("thrusters")
+            },
             config: {
                 animationEndAction: AnimationEnd.LOOP,
                 xAnchor: 0.5,
@@ -93,6 +98,7 @@ export class Lander extends Entity {
             if (!inRange.isConnected) {
                 fireSpr.setAnimation(0, false);
                 LD59.audio.play("out_of_range");
+
                 return;
             }
 
@@ -108,7 +114,6 @@ export class Lander extends Entity {
             if (Game.keyboard.isKeyDown(Key.KeyW)) {
                 const moveVector = MathUtil.lengthDirXY(delta * Phys.THRUST, MathUtil.degToRad(-90) + entity.transform.rotation);
                 body.move(moveVector.x, moveVector.y);
-                LD59.audio.play("thrusters");
                 fireSpr.setAnimation(1, false);
             } else {
                 fireSpr.setAnimation(0, false);
