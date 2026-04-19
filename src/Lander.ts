@@ -233,7 +233,7 @@ export class Lander extends Entity {
             }),
         ).pixiObj.anchor.set(0.5);
 
-        const score = this.scene.addEntity(new Score(LD59.GAME_WIDTH / 2, LD59.GAME_HEIGHT / 2));
+        const score = this.scene.addGUIEntity(new Score(LD59.GAME_WIDTH / 2, LD59.GAME_HEIGHT / 2));
         const time_ms = this.scene.getEntityWithName("level_time")?.getComponent<TimerText>(TimerText)?.time_ms;
         if (time_ms) {
             score.getComponent<ScoreDisplay>(ScoreDisplay)?.calc_score(time_ms, LD59.ANTS.size);
