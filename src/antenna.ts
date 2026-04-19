@@ -1,4 +1,16 @@
-import {Button, CircleSatCollider, Entity, Game, MathUtil, RectSatCollider, Sprite, Timer} from "lagom-engine";
+import {
+    Button,
+    CircleSatCollider,
+    Component,
+    Entity,
+    Game,
+    GlobalSystem,
+    LagomType,
+    MathUtil,
+    RectSatCollider,
+    Sprite,
+    Timer
+} from "lagom-engine";
 import {Layers} from "./LD59";
 
 export class RotateToPlayerSprite extends Sprite {
@@ -114,6 +126,8 @@ export class MouseTracker extends Entity {
             // TODO engine: fix canvas pos when the game is scaled
             const pos = Game.mouse.canvasPos().divide(2);
 
+            // if we are adjacent to a full block but inside an angled block this will show that placement is valid but
+            // it won't actually allow it.
             if (this.snapDir === null) {
                 sprite.applyConfig({alpha: 0.3})
             } else {
@@ -157,6 +171,33 @@ class ClickDetector extends Entity {
             data.destroy();
             this.getScene().addEntity(new Antenna(this.transform.x, this.transform.y, Layers.ANTENNA_OBJ, this.snapDir));
             this.destroy();
+        })
+    }
+}
+
+export class AntennaRotator extends GlobalSystem<[RotateToPlayerSprite[]]> {
+    types: LagomType<Component>[] = [RotateToPlayerSprite];
+
+    update(delta: number): void {
+        const player = this.getScene().getEntityWithName("lander");
+        if (player === null) {
+            return;
+        }
+        this.runOnComponents(sprites => {
+            sprites.forEach(sprite => {
+                const dist = MathUtil.pointDistance(sprite.parent.transform.x, sprite.parent.transform.y,
+                    player.transform.x, player.transform.y);
+                const rot = sprite.pixiObj.rotation;
+
+                // TODO we could use the LOS stuff too?
+                // TODO fix this value when it is known
+                if (dist < 100) {
+                    const target = MathUtil.degToRad(90) + MathUtil.pointDirection(player.transform.x, player.transform.y, sprite.parent.transform.x, sprite.parent.transform.y);
+                    sprite.applyConfig({rotation: MathUtil.angleLerp(rot, -target, delta * 0.01)})
+                } else {
+                    sprite.applyConfig({rotation: MathUtil.angleLerp(rot, rot + 0.3, delta * 0.01)})
+                }
+            })
         })
     }
 }

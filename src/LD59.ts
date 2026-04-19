@@ -15,7 +15,7 @@ import {
 } from "lagom-engine";
 import {SoundManager} from "./util/SoundManager";
 import {LevelLoader} from "./LevelLoad";
-import {MouseTracker} from "./antenna";
+import {AntennaRotator, MouseTracker} from "./antenna";
 
 export enum Layers {
     SHIP,
@@ -101,6 +101,7 @@ class MainScene extends Scene {
         matrix.addCollision(Layers.SOLIDS, Layers.ANTENNA_PROBING);
 
         this.addGlobalSystem(new SatCollisionSystem(matrix));
+        this.addGlobalSystem(new AntennaRotator());
 
         this.addEntity(new LevelLoader(1));
 
