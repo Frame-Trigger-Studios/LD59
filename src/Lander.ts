@@ -4,13 +4,16 @@ import {
     Entity,
     Game,
     Key,
+    Log,
     MathUtil,
     RenderCircle,
     Rigidbody,
+    Scene,
     SimplePhysicsBody,
-    Sprite
+    Sprite,
+    TextDisp
 } from "lagom-engine";
-import {Layers} from "./LD59";
+import {GameState, Layers, LD59} from "./LD59";
 
 
 class Phys {
@@ -91,32 +94,55 @@ export class Lander extends Entity {
         this.addComponent(new Rigidbody());
         this.addComponent(new SimplePhysicsBody({angCap: 0.08, angDrag: 0.005, linCap: 1, linDrag: 0.0000005}));
 
-        const col = this.addComponent(new CircleSatCollider({layer: Layers.SHIP, radius: 6}));
+        const col = this.addComponent(new CircleSatCollider({layer: Layers.SHIP, radius: 5}));
         col.onTriggerWithLayer(Layers.PAD, (caller, data) => {
             // Check if it was a safe landing or not.
             const ang = Math.abs(caller.parent.transform.angle % 360);
-            const phys = caller.parent.getComponent<SimplePhysicsBody>(SimplePhysicsBody);
-            const yVel = phys?.yVel ?? 1000;
-            const xVel = phys?.xVel ?? 1000;
 
-            if (ang < 15 && yVel < 0.5 && Math.abs(xVel) < 0.2) {
-                console.log("SAFE")
+            // It's kinda funny to launch across the map and land on the pad, maybe we remove the checks and any landing
+            // is safe?
+            if (ang < 45) {
+                Log.info("SAFE")
+                LD59.STATE = GameState.Win;
+                this.winMsg(caller.getScene());
 
             } else {
-                // console.log("a", ang, "x", xVel, "y", yVel);
+                Log.info("Angle too extreme", ang);
+                LD59.STATE = GameState.Dead;
+                this.deadMsg(caller.getScene());
             }
-
+            caller.destroy();
             caller.parent.getComponent(Rigidbody)?.destroy();
             caller.parent.getComponent(SimplePhysicsBody)?.destroy();
+
         });
 
         col.onTriggerWithLayer(Layers.SOLIDS, (caller, data) => {
 
             // DEAD
-            console.log("DEAD", caller, data.other);
             caller.parent.getComponent(Rigidbody)?.destroy();
             caller.parent.getComponent(SimplePhysicsBody)?.destroy();
             data.other.getEntity().addComponent(new RenderCircle({radius: 10}));
+            LD59.STATE = GameState.Dead;
+            this.deadMsg(caller.getScene());
         })
+    }
+
+    private deadMsg(scene: Scene) {
+        scene.addGUIEntity(new Entity("retryinstr")).addComponent(
+            new TextDisp(Game.GAME_WIDTH / 2, 60, "Ouch\nPress Space to restart\nor E to edit antenna placement", {
+                fontFamily: "retro",
+                fill: 0xffffff,
+            }),
+        ).pixiObj.anchor.set(0.5);
+    }
+
+    private winMsg(scene: Scene) {
+        scene.addGUIEntity(new Entity("retryinstr")).addComponent(
+            new TextDisp(Game.GAME_WIDTH / 2, 60, "Nice\nPress Space go to next level\nor R/E to replay", {
+                fontFamily: "retro",
+                fill: 0xffffff,
+            }),
+        ).pixiObj.anchor.set(0.5);
     }
 }

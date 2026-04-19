@@ -85,14 +85,58 @@ class MainScene extends Scene {
         ).pixiObj.anchor.set(0.5);
 
         const mouse = this.addEntity(new MouseTracker("mouse", 0, 0));
-        this.addSystem(new ActionOnPress((system) => {
-            this.getEntityWithName("lander_placeholder")?.destroy();
-            text.destroy();
-            mouse.destroy();
-            // TODO engine: this should be built in to ActionOnPress (optional)
-            system.destroy();
 
+        this.addSystem(new ActionOnPress(() => {
+            switch (LD59.STATE) {
+                // This transitions Planning -> Game
+                case GameState.Planning:
+                    this.getEntityWithName("lander_placeholder")?.destroy();
+                    text.destroy();
+                    mouse.destroy();
+                    LD59.STATE = GameState.Game;
+                    break
+                // Transition from Dead -> Restart (skip planning)
+                case GameState.Dead:
+                    LD59.STATE = GameState.AutoStart;
+                    this.game.setScene(new MainScene(this.game));
+                    break;
+
+                case GameState.Win:
+                    LD59.CURRENT_LEVEL += 1;
+                    LD59.ANTS.clear();
+                    LD59.STATE = GameState.Planning;
+                    this.game.setScene(new MainScene(this.game));
+                    break;
+            }
         }, [Key.Space]));
+
+
+        // Quick restart
+        this.addSystem(new ActionOnPress(() => {
+            switch (LD59.STATE) {
+                // Transition from Game -> Game
+                // If you cleared the level, allow retry.
+                case GameState.Game:
+                case GameState.Dead:
+                case GameState.Win:
+                    LD59.STATE = GameState.AutoStart;
+                    this.game.setScene(new MainScene(this.game));
+                    break;
+            }
+        }, [Key.KeyR]));
+
+        this.addSystem(new ActionOnPress(() => {
+            switch (LD59.STATE) {
+                // Transition from Game or Dead -> Planning
+                case GameState.Dead:
+                case GameState.Game:
+                case GameState.Win:
+                    LD59.STATE = GameState.Planning;
+                    this.game.setScene(new MainScene(this.game));
+                    break;
+            }
+        }, [Key.KeyE]));
+
 
         const matrix = new CollisionMatrix();
         matrix.addCollision(Layers.SHIP, Layers.SOLIDS);
@@ -105,20 +149,39 @@ class MainScene extends Scene {
         this.addGlobalSystem(new SatCollisionSystem(matrix));
         this.addGlobalSystem(new AntennaRotator());
 
-        this.addEntity(new LevelLoader(1));
-
         SatCollisionSystem.DEBUG_DRAW = true;
+
+        this.addEntity(new LevelLoader(LD59.CURRENT_LEVEL));
+
+        if (LD59.STATE === GameState.AutoStart) {
+            this.getEntityWithName("lander_placeholder")?.destroy();
+            text.destroy();
+            mouse.destroy();
+            LD59.STATE = GameState.Game;
+        }
 
         // Game.audio.startMusic("music", true);
     }
+}
+
+export enum GameState {
+    AutoStart,
+    Planning,
+    Game,
+    Dead,
+    Win
 }
 
 export class LD59 extends Game {
     startScene = () => new MainScene(this);
     resourceLoad = async () => {
         await Game.resourceLoader.autoLoad();
-        console.log("loaded all resources");
+        Log.info("loaded all resources");
     };
+
+    static STATE = GameState.Planning;
+    static ANTS = new Set<number[]>();
+    static CURRENT_LEVEL = 1;
 
     constructor() {
         super({

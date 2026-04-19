@@ -1,18 +1,9 @@
-import {
-    Entity,
-    Game,
-    PolySatCollider,
-    RectSatCollider,
-    RenderPoly,
-    RenderRect,
-    Sprite,
-    TiledMap,
-    TiledMapLoader
-} from "lagom-engine";
+import {Entity, Game, PolySatCollider, RectSatCollider, Sprite, TiledMap, TiledMapLoader} from "lagom-engine";
 import levels from "./assets/Levels.json";
 import {LanderPlaceholder} from "./Lander";
 import {LandingPad} from "./LandingPad";
-import {Layers} from "./LD59";
+import {Layers, LD59} from "./LD59";
+import {Antenna} from "./antenna";
 
 export class Tile extends Entity {
     constructor(readonly tileId: number, readonly x: number, readonly y: number) {
@@ -128,8 +119,11 @@ export class Tile extends Entity {
 
 export class LevelLoader
     extends Entity {
-    constructor(readonly levelId: number = 1) {
+    constructor(readonly levelId: number = 1, clearAntenna = false) {
         super("loader", 0, 0);
+        if (clearAntenna) {
+            LD59.ANTS.clear();
+        }
     }
 
     onAdded() {
@@ -152,6 +146,10 @@ export class LevelLoader
                 this.scene.addEntity(new Tile(tileId, x, y));
             }
         });
+
+        LD59.ANTS.forEach(value => {
+            this.getScene().addEntity(new Antenna(value[0], value[1], value[2]));
+        })
 
         this.destroy();
     }

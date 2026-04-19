@@ -12,7 +12,7 @@ import {
     Sprite,
     Timer
 } from "lagom-engine";
-import {Layers} from "./LD59";
+import {Layers, LD59} from "./LD59";
 import {Connected} from "./Lander";
 
 export class RotateToPlayerSprite extends Sprite {
@@ -26,8 +26,8 @@ class Probe extends PolySatCollider {
 
 export class Antenna extends Entity {
 
-    constructor(x: number, y: number, depth: number, readonly rot: number) {
-        super("antenna", x, y, depth);
+    constructor(x: number, y: number, readonly rot: number) {
+        super("antenna", x, y, Layers.ANTENNA_OBJ);
     }
 
     onAdded() {
@@ -213,7 +213,8 @@ class ClickDetector extends Entity {
         // If this triggers, there wasn't an antenna here
         this.addComponent(new Timer(50, coll, false)).onTrigger.register((caller, data) => {
             data.destroy();
-            this.getScene().addEntity(new Antenna(this.transform.x, this.transform.y, Layers.ANTENNA_OBJ, this.snapDir));
+            this.getScene().addEntity(new Antenna(this.transform.x, this.transform.y, this.snapDir));
+            LD59.ANTS.add([this.transform.x, this.transform.y, this.snapDir]);
             this.destroy();
         })
     }
