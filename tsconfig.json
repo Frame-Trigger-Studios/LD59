@@ -6,9 +6,11 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "resolveJsonModule": true,
-
+//        TODO engine: backport this to the template
+        "noEmit": true,
         /* Linting */
         "strict": true
     },
-    "include": ["src"]
+    "include": ["src"],
+    "exclude": ["src/assets/**/*.tsx"]
 }
