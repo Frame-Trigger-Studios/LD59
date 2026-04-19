@@ -81,18 +81,17 @@ export class Antenna extends Entity {
             const dist = MathUtil.pointDistance(caller.parent.transform.x, caller.parent.transform.y,
                 player.transform.x, player.transform.y);
 
-            // Enable outlines here if needed
-            // const alpha = Math.max(0, Math.min(0.3 * (1 - (dist - 100) / 50), 0.3));
-            outline.setStyle({lineAlpha: 0});
-
+            // Set the outline alpha
+            const alpha = Math.max(0, Math.min(0.3 * (1 - (dist - 100) / 50), 0.3));
             // In range, spawn the line of sight checker
-            if (dist < Antenna.ANT_DIST) {
+            if (dist < Antenna.ANT_DIST + 50) {
                 const probe = caller.parent.addComponent(new Probe({
                     layer: Layers.LOS_PROBE,
                     points: [[0, 0], [-caller.parent.transform.x + player.transform.x, -caller.parent.transform.y + player.transform.y]]
                 }));
                 probe.onTriggerWithLayer(Layers.SOLIDS, () => {
                     // Hit a wall, we aren't able to see the player.
+                    outline.setStyle({lineAlpha: 0});
                     rotator.connected = false;
                     probe.dead = true;
                     probe.destroy();
@@ -101,13 +100,20 @@ export class Antenna extends Entity {
                     const activeProbe = caller1.parent.getComponent<Probe>(Probe);
                     // We didn't hit a wall, so it is connected
                     if (activeProbe != null && !activeProbe.dead) {
+                        outline.setStyle({lineAlpha: alpha});
                         rotator.connected = true;
                         rotator.radDir = MathUtil.degToRad(90) + MathUtil.pointDirection(player.transform.x, player.transform.y, caller1.parent.transform.x, caller1.parent.transform.y);
                         activeProbe.destroy();
+
+                        if (dist > Antenna.ANT_DIST) {
+                            rotator.connected = false;
+                            outline.setStyle({lineAlpha: alpha});
+                        }
                     }
                 });
             } else {
                 rotator.connected = false;
+                outline.setStyle({lineAlpha: 0});
             }
         })
     }
