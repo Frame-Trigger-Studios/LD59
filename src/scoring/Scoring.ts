@@ -1,11 +1,11 @@
-import {Component, Entity, Game, GlobalSystem, LagomType, MathUtil, Sprite, TextDisp} from "lagom-engine";
-import {LD59} from "../LD59";
+import {Component, Entity, Game, GlobalSystem, LagomType, Sprite, TextDisp} from "lagom-engine";
+import {Layers, LD59} from "../LD59";
 
 export class GameTimer extends Entity {
-    timeTextComponent;
+    timeTextComponent!: Component;
 
     constructor(x: number, y: number) {
-        super("level_time", x, y,);
+        super("level_time", x, y, Layers.GUI);
     }
 
     onAdded() {
@@ -34,15 +34,15 @@ export class TimerText extends TextDisp {
 
     reset() {
         this.time_ms = 0;
-        this.set_text();
+        this.setText();
     }
 
-    increment(time_passed) {
-        this.time_ms += time_passed
-        this.set_text();
+    increment(timePassed: number) {
+        this.time_ms += timePassed
+        this.setText();
     }
 
-    set_text() {
+    setText() {
         this.text = `${(this.time_ms / 1000).toFixed(0)}`
     }
 }
@@ -58,7 +58,7 @@ export class GameTimerSystem extends GlobalSystem<[]> {
 export class AntennaDisp extends Entity {
 
     constructor(x: number, y: number) {
-        super("antenna_disp", x, y);
+        super("antenna_disp", x, y, Layers.GUI);
     }
 
     onAdded() {

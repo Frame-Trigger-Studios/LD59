@@ -81,8 +81,9 @@ export class Antenna extends Entity {
             const dist = MathUtil.pointDistance(caller.parent.transform.x, caller.parent.transform.y,
                 player.transform.x, player.transform.y);
 
-            const alpha = Math.max(0, Math.min(0.3 * (1 - (dist - 100) / 50), 0.3));
-            outline.setStyle({lineAlpha: alpha});
+            // Enable outlines here if needed
+            // const alpha = Math.max(0, Math.min(0.3 * (1 - (dist - 100) / 50), 0.3));
+            outline.setStyle({lineAlpha: 0});
 
             // In range, spawn the line of sight checker
             if (dist < Antenna.ANT_DIST) {
