@@ -1,4 +1,14 @@
-import {CircleSatCollider, Entity, Game, Key, MathUtil, Rigidbody, SimplePhysicsBody, Sprite} from "lagom-engine";
+import {
+    CircleSatCollider,
+    Entity,
+    Game,
+    Key,
+    MathUtil,
+    RenderCircle,
+    Rigidbody,
+    SimplePhysicsBody,
+    Sprite
+} from "lagom-engine";
 import {InRange} from "./Signal";
 import {Layers} from "./LD59";
 
@@ -70,7 +80,7 @@ export class Lander extends Entity {
         });
 
         this.addComponent(new Rigidbody());
-        this.addComponent(new SimplePhysicsBody({angCap: 0.08, angDrag: 0.005, linCap: 1, linDrag: 0.00005}));
+        this.addComponent(new SimplePhysicsBody({angCap: 0.08, angDrag: 0.005, linCap: 1, linDrag: 0.0000005}));
 
         const col = this.addComponent(new CircleSatCollider({layer: Layers.SHIP, radius: 6}));
         col.onTriggerWithLayer(Layers.PAD, (caller, data) => {
@@ -90,5 +100,14 @@ export class Lander extends Entity {
             caller.parent.getComponent(Rigidbody)?.destroy();
             caller.parent.getComponent(SimplePhysicsBody)?.destroy();
         });
+
+        col.onTriggerWithLayer(Layers.SOLIDS, (caller, data) => {
+
+            // DEAD
+            console.log("DEAD", caller, data.other);
+            caller.parent.getComponent(Rigidbody)?.destroy();
+            caller.parent.getComponent(SimplePhysicsBody)?.destroy();
+            data.other.getEntity().addComponent(new RenderCircle({radius: 10}));
+        })
     }
 }

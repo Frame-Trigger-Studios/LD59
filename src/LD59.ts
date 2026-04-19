@@ -10,6 +10,7 @@ import {
     Scene,
     SimplePhysics,
     TextDisp,
+    Timer,
     TimerSystem
 } from "lagom-engine";
 import {SoundManager} from "./util/SoundManager";
@@ -24,6 +25,14 @@ export enum Layers {
     PAD,
     SOLIDS,
     CLICK,
+}
+
+export enum Palette {
+    PURPLE = 0x292831,
+    DARK_BLUE = 0x333f58,
+    BLUE = 0x4a7a96,
+    PINK = 0xee8695,
+    CREAM = 0xfbbbad
 }
 
 class TitleScene extends Scene {
@@ -93,7 +102,6 @@ class MainScene extends Scene {
 
         this.addEntity(new LevelLoader(1));
 
-
         // Game.audio.startMusic("music", true);
     }
 }
@@ -109,7 +117,7 @@ export class LD59 extends Game {
         super({
             width: 640,
             height: 360,
-            resolution: 2,
+            resolution: 1,
             backgroundColor: 0x292831,
         });
 
