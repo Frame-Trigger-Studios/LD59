@@ -1,4 +1,6 @@
 import {
+    AnimatedSpriteController,
+    AnimationEnd,
     CircleSatCollider,
     Component,
     Entity,
@@ -53,6 +55,23 @@ export class Lander extends Entity {
         super.onAdded();
 
         this.addComponent(new Sprite(Game.resourceLoader.get("lander").tileIdx(0), {xAnchor: 0.5, yAnchor: 0.5}));
+        const fireTex = Game.resourceLoader.get("fire");
+        const fireSpr = this.addComponent(new AnimatedSpriteController(0, [{
+            // Blank
+            id: 0,
+            textures: [fireTex.tileIdx(4)]
+        }, {
+            // Fire
+            id: 1,
+            textures: fireTex.tileSlice(0, 3),
+            config: {
+                animationEndAction: AnimationEnd.LOOP,
+                xAnchor: 0.5,
+                yAnchor: 0.5,
+                yOffset: 4,
+                animationSpeed: 50
+            }
+        }]));
 
         this.getScene().addFnSystem([Rigidbody], (delta, entity, body) => {
             entity.transform.x += body.pendingX;
@@ -69,8 +88,8 @@ export class Lander extends Entity {
         this.getScene().addFnSystem([SimplePhysicsBody, Connected], (delta, entity, body: SimplePhysicsBody, inRange: Connected) => {
             // Make sure gravity is applied
             body.move(0, Phys.GRAVITY * delta);
-
             if (!inRange.isConnected) {
+                fireSpr.setAnimation(0, false);
                 return;
             }
 
@@ -84,11 +103,10 @@ export class Lander extends Entity {
             if (Game.keyboard.isKeyDown(Key.KeyW)) {
                 const moveVector = MathUtil.lengthDirXY(delta * Phys.THRUST, MathUtil.degToRad(-90) + entity.transform.rotation);
                 body.move(moveVector.x, moveVector.y);
-                // sprite.setAnimation(1, false);
+                fireSpr.setAnimation(1, false);
                 // (entity.scene.getEntityWithName("audio") as SoundManager).playSound("rocket");
             } else {
-                // sprite.setAnimation(0, false);
-                // (entity.scene.getEntityWithName("audio") as SoundManager).stopSound("rocket");
+                fireSpr.setAnimation(0, false);
             }
         });
 

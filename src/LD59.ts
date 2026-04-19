@@ -7,11 +7,13 @@ import {
     Key,
     Log,
     LogLevel,
+    MathUtil,
     SatCollisionSystem,
     Scene,
     SimplePhysics,
+    Sprite,
     TextDisp,
-    TimerSystem
+    TimerSystem, Util
 } from "lagom-engine";
 import {SoundManager} from "./util/SoundManager";
 import {LevelLoader} from "./LevelLoad";
@@ -19,6 +21,7 @@ import {AntennaRotator, MouseTracker} from "./antenna";
 import {AntennaDisp, GameTimer, GameTimerSystem} from "./scoring/Scoring";
 
 export enum Layers {
+    BACKGROUND,
     SHIP,
     ANTENNA_OBJ,
     ANTENNA_PROBING,
@@ -68,6 +71,32 @@ class MainScene extends Scene {
         this.addGlobalSystem(new FrameTriggerSystem());
 
         this.addSystem(new SimplePhysics());
+
+        // Load background
+        if (LD59.BACKGROUNDS.length < LD59.CURRENT_LEVEL) {
+            // Generate one
+            const bg = [];
+            for (let i = 0; i < 60; i++) {
+                bg.push([MathUtil.randomRange(0, 20), Util.choose(-1, 1)]);
+            }
+            LD59.BACKGROUNDS.push(bg);
+        }
+
+        const bg = this.addEntity(new Entity("bg", 0, 0, Layers.BACKGROUND));
+        for (let i = 0; i < 10; i++) {
+            for (let j = 0; j < 6; j++) {
+                const idx = LD59.BACKGROUNDS[LD59.CURRENT_LEVEL - 1][(i * 6) + j];
+
+                bg.addComponent(new Sprite(Game.resourceLoader.get("background").tileIdx(idx[0]), {
+                    xOffset: i * 64 + 32,
+                    yOffset: j * 64 + 32,
+                    xScale: idx[1],
+                    yScale: idx[1],
+                    yAnchor: 0.5,
+                    xAnchor: 0.5
+                }));
+            }
+        }
 
         const text = this.addGUIEntity(new Entity("title"));
         text.addComponent(
@@ -193,6 +222,7 @@ export class LD59 extends Game {
     // tuples aren't hashable??? JS why
     static ANTS = new Set<string>();
     static CURRENT_LEVEL = 1;
+    static BACKGROUNDS: number[][][] = [];
 
     constructor() {
         super({
