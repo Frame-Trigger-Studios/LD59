@@ -1,5 +1,6 @@
 import {
     CircleSatCollider,
+    Component,
     Entity,
     Game,
     Key,
@@ -9,7 +10,6 @@ import {
     SimplePhysicsBody,
     Sprite
 } from "lagom-engine";
-import {InRange} from "./Signal";
 import {Layers} from "./LD59";
 
 
@@ -35,6 +35,10 @@ export class LanderPlaceholder extends Entity {
     }
 }
 
+export class Connected extends Component {
+    isConnected = false;
+}
+
 export class Lander extends Entity {
 
     constructor(x: number, y: number) {
@@ -55,10 +59,17 @@ export class Lander extends Entity {
             body.pendingRotation = 0;
         })
 
-        this.addComponent(new InRange());
+        this.addComponent(new Connected());
 
         // Player mover
-        this.getScene().addFnSystem([SimplePhysicsBody, InRange], (delta, entity, body: SimplePhysicsBody, inRange: InRange) => {
+        this.getScene().addFnSystem([SimplePhysicsBody, Connected], (delta, entity, body: SimplePhysicsBody, inRange: Connected) => {
+            // Make sure gravity is applied
+            body.move(0, Phys.GRAVITY * delta);
+
+            if (!inRange.isConnected) {
+                return;
+            }
+
             if (Game.keyboard.isKeyDown(Key.KeyA)) {
                 body.rotate(MathUtil.degToRad(delta * -Phys.ROT_SPEED));
             }
@@ -75,8 +86,6 @@ export class Lander extends Entity {
                 // sprite.setAnimation(0, false);
                 // (entity.scene.getEntityWithName("audio") as SoundManager).stopSound("rocket");
             }
-
-            body.move(0, Phys.GRAVITY * delta);
         });
 
         this.addComponent(new Rigidbody());

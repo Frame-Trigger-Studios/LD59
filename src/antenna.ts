@@ -13,6 +13,7 @@ import {
     Timer
 } from "lagom-engine";
 import {Layers} from "./LD59";
+import {Connected} from "./Lander";
 
 export class RotateToPlayerSprite extends Sprite {
     radDir = 0;
@@ -53,7 +54,7 @@ export class Antenna extends Entity {
                 player.transform.x, player.transform.y);
 
             // In range, spawn the line of sight checker
-            if (dist < 1000) {
+            if (dist < 200) {
                 const probe = caller.parent.addComponent(new Probe({
                     layer: Layers.LOS_PROBE,
                     points: [[0, 0], [-caller.parent.transform.x + player.transform.x, -caller.parent.transform.y + player.transform.y]]
@@ -223,14 +224,17 @@ export class AntennaRotator extends GlobalSystem<[RotateToPlayerSprite[]]> {
 
     update(delta: number): void {
         const player = this.getScene().getEntityWithName("lander");
-        if (player === null) {
+        const connected = player?.getComponent<Connected>(Connected);
+        if (player === null || connected === null) {
             return;
         }
+        connected!.isConnected = false;
         this.runOnComponents(sprites => {
             sprites.forEach(sprite => {
                 const rot = sprite.pixiObj.rotation;
                 if (sprite.connected) {
                     sprite.applyConfig({rotation: MathUtil.angleLerp(rot, -sprite.radDir, delta * 0.01)})
+                    connected!.isConnected = true;
                 } else {
                     sprite.applyConfig({rotation: MathUtil.angleLerp(rot, rot + 0.3, delta * 0.01)})
                 }
