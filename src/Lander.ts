@@ -1,4 +1,6 @@
 import {
+    AnimatedSpriteController,
+    AnimationEnd,
     CircleSatCollider,
     Component,
     Entity,
@@ -15,7 +17,6 @@ import {
 } from "lagom-engine";
 import {GameState, Layers, LD59} from "./LD59";
 import {GameTimerSystem, Score, ScoreDisplay, TimerText} from "./scoring/Scoring";
-import {SoundManager} from "./util/SoundManager";
 
 
 class Phys {
@@ -54,6 +55,29 @@ export class Lander extends Entity {
         super.onAdded();
 
         this.addComponent(new Sprite(Game.resourceLoader.get("lander").tileIdx(0), {xAnchor: 0.5, yAnchor: 0.5}));
+        const fireTex = Game.resourceLoader.get("fire");
+        const fireSpr = this.addComponent(new AnimatedSpriteController(0, [{
+            // Blank
+            id: 0,
+            textures: [fireTex.tileIdx(4)],
+            events: {
+                0: () => LD59.audio.stop("thrusters")
+            }
+        }, {
+            // Fire
+            id: 1,
+            textures: fireTex.tileSlice(0, 3),
+            events: {
+                0: () => LD59.audio.play("thrusters")
+            },
+            config: {
+                animationEndAction: AnimationEnd.LOOP,
+                xAnchor: 0.5,
+                yAnchor: 0.5,
+                yOffset: 4,
+                animationSpeed: 50
+            }
+        }]));
 
         this.getScene().addFnSystem([Rigidbody], (delta, entity, body) => {
             entity.transform.x += body.pendingX;
@@ -72,8 +96,10 @@ export class Lander extends Entity {
             body.move(0, Phys.GRAVITY * delta);
 
             if (!inRange.isConnected) {
-                LD59.audio.stop("thrusters4");
+                LD59.audio.stop("thrusters");
+                fireSpr.setAnimation(0, false);
                 LD59.audio.play("out_of_range");
+
                 return;
             }
 
@@ -89,12 +115,11 @@ export class Lander extends Entity {
             if (Game.keyboard.isKeyDown(Key.KeyW)) {
                 const moveVector = MathUtil.lengthDirXY(delta * Phys.THRUST, MathUtil.degToRad(-90) + entity.transform.rotation);
                 body.move(moveVector.x, moveVector.y);
-                // sprite.setAnimation(1, false);
-                LD59.audio.play("thrusters4");
+                LD59.audio.play("thrusters");
+                fireSpr.setAnimation(1, false);
             } else {
-                // sprite.setAnimation(0, false);
-                // (entity.scene.getEntityWithName("audio") as SoundManager).stopSound("rocket");
-                LD59.audio.stop("thrusters4");
+                LD59.audio.stop("thrusters");
+                fireSpr.setAnimation(0, false);
             }
         });
 
@@ -131,6 +156,7 @@ export class Lander extends Entity {
             // DEAD
             caller.parent.getComponent(Rigidbody)?.destroy();
             caller.parent.getComponent(SimplePhysicsBody)?.destroy();
+            caller.destroy();
             data.other.getEntity().addComponent(new RenderCircle({radius: 10}));
             LD59.STATE = GameState.Dead;
             this.deadMsg(caller.getScene());
