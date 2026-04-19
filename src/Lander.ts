@@ -14,7 +14,7 @@ import {
     TextDisp
 } from "lagom-engine";
 import {GameState, Layers, LD59} from "./LD59";
-import {GameTimerSystem} from "./scoring/Scoring";
+import {GameTimerSystem, Score, ScoreDisplay, TimerText} from "./scoring/Scoring";
 
 
 class Phys {
@@ -107,7 +107,6 @@ export class Lander extends Entity {
                 LD59.STATE = GameState.Win;
                 this.winMsg(caller.getScene());
 
-
             } else {
                 Log.info("Angle too extreme", ang);
                 LD59.STATE = GameState.Dead;
@@ -139,6 +138,12 @@ export class Lander extends Entity {
                 fill: 0xffffff,
             }),
         ).pixiObj.anchor.set(0.5);
+
+        const score = this.scene.addGUIEntity(new Score(LD59.GAME_WIDTH / 2, LD59.GAME_HEIGHT / 2));
+        const time_ms = this.scene.getEntityWithName("level_time")?.getComponent<TimerText>(TimerText)?.time_ms;
+        if (time_ms) {
+            score.getComponent<ScoreDisplay>(ScoreDisplay)?.calc_score(time_ms, LD59.ANTS.size);
+        }
     }
 
     private winMsg(scene: Scene) {
@@ -148,5 +153,11 @@ export class Lander extends Entity {
                 fill: 0xffffff,
             }),
         ).pixiObj.anchor.set(0.5);
+
+        const score = this.scene.addEntity(new Score(LD59.GAME_WIDTH / 2, LD59.GAME_HEIGHT / 2));
+        const time_ms = this.scene.getEntityWithName("level_time")?.getComponent<TimerText>(TimerText)?.time_ms;
+        if (time_ms) {
+            score.getComponent<ScoreDisplay>(ScoreDisplay)?.calc_score(time_ms, LD59.ANTS.size);
+        }
     }
 }

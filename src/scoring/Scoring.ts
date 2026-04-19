@@ -20,7 +20,7 @@ export class GameTimer extends Entity {
     }
 }
 
-class TimerText extends TextDisp {
+export class TimerText extends TextDisp {
     time_ms: number;
 
     constructor() {
@@ -29,7 +29,7 @@ class TimerText extends TextDisp {
             fill: 0xffffff,
         });
         this.time_ms = 0;
-        this.pixiObj.anchor.set(1,1);
+        this.pixiObj.anchor.set(1, 1);
     }
 
     reset() {
@@ -43,15 +43,14 @@ class TimerText extends TextDisp {
     }
 
     set_text() {
-        this.text = `${(this.time_ms/1000).toFixed(0)}`
+        this.text = `${(this.time_ms / 1000).toFixed(0)}`
     }
 }
 
 export class GameTimerSystem extends GlobalSystem<[]> {
     types: LagomType<Component>[] = [];
 
-    update(delta: number): void
-    {
+    update(delta: number): void {
         this.scene.getEntityWithName("level_time")?.getComponent<TimerText>(TimerText)?.increment(delta);
     }
 }
@@ -88,10 +87,49 @@ export class NumAntennas extends TextDisp {
             fontFamily: "retro",
             fill: 0xffffff,
         });
-        this.pixiObj.anchor.set(1,1);
+        this.pixiObj.anchor.set(1, 1);
     }
 
     update_antennas() {
         this.text = `${LD59.ANTS.size}`
+    }
+}
+
+export class Score extends Entity {
+
+    constructor(x: number, y: number) {
+        super("score", x, y);
+    }
+
+    onAdded() {
+        super.onAdded();
+        this.addComponent(
+            new TextDisp(0, 0, "You scored:", {
+                fontFamily: "retro",
+                fill: 0xffffff,
+            }),
+        ).pixiObj.anchor.set(0.5);
+        this.addComponent(new ScoreDisplay(30));
+
+    }
+}
+
+export class ScoreDisplay extends TextDisp {
+    constructor(yOff: number) {
+        super(0, yOff, "0", {
+            fontFamily: "retro",
+            fill: 0xffffff,
+        });
+        this.pixiObj.anchor.set(0.5, 0.5);
+    }
+
+    calc_score(time_ms: number, antennas: number) {
+        let score = 0;
+        if (antennas > 0) {
+            score = (Math.max(180_000 - time_ms, 0) / antennas) / 1000;
+            score = Math.floor(score);
+        }
+
+        this.text = `${score} points`
     }
 }
