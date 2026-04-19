@@ -127,8 +127,8 @@ class MainScene extends Scene {
         ).pixiObj.anchor.set(0.5);
 
         const mouse = this.addEntity(new MouseTracker("mouse", 0, 0, Layers.ANT_PLACER));
-        this.addGUIEntity(new AntennaDisp(LD59.GAME_WIDTH - 30, 55, Layers.GUI));
-        this.addGUIEntity(new GameTimer(LD59.GAME_WIDTH - 30, 25, Layers.GUI));
+        this.addGUIEntity(new AntennaDisp(LD59.GAME_WIDTH - 30, 55));
+        this.addGUIEntity(new GameTimer(LD59.GAME_WIDTH - 30, 25));
 
         if (LD59.STATE == GameState.AutoStart) {
             this.addGlobalSystem(new GameTimerSystem());
