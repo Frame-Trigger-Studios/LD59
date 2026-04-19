@@ -209,6 +209,14 @@ class ClickDetector extends Entity {
             }
             if (data.other.layer === Layers.ANTENNA_OBJ) {
                 data.other.parent.destroy();
+                for (let tuple: number[][] of LD59.ANTS.entries()) {
+                    const antenna:number[] = tuple[0];
+                    if (antenna[0] == this.transform.x && antenna[1] == this.transform.y && antenna[2] == this.snapDir) {
+                        LD59.ANTS.delete(antenna);
+                        break;
+                    }
+                }
+
                 this.destroy();
             }
         });
