@@ -136,14 +136,24 @@ export class LevelLoader
             x = x + 8;
             y = y + 8;
 
-            if (tileId === 28) {
-                // Player
-                this.scene.addEntity(new LanderPlaceholder(x, y));
-            } else if (tileId === 29) {
-                // Landing pad
-                this.scene.addEntity(new LandingPad(x, y));
-            } else if (tileId !== 0) {
-                this.scene.addEntity(new Tile(tileId, x, y));
+            switch (tileId) {
+                case 0:
+                    // Empty
+                    break;
+                case 3:
+                    // Player
+                    this.scene.addEntity(new LanderPlaceholder(x, y));
+                    break;
+                case 32:
+                case 33:
+                case 34:
+                case 35:
+                    // Landing pad
+                    this.scene.addEntity(new LandingPad(x, y, tileId - 32));
+                    break;
+                default:
+                    this.scene.addEntity(new Tile(tileId, x, y));
+                    break;
             }
         });
 
