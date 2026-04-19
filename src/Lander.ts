@@ -9,9 +9,9 @@ import {
     Key,
     Log,
     MathUtil,
-    RenderCircle,
     Rigidbody,
-    Scene,
+    SatCollider,
+    Scene, ScreenShake, ScreenShaker,
     SimplePhysicsBody,
     Sprite,
     TextDisp,
@@ -50,13 +50,26 @@ export class Connected extends Component {
 export class Lander extends Entity {
 
     constructor(x: number, y: number) {
-        super("lander", x, y);
+        super("lander", x, y, Layers.SHIP);
     }
 
     onAdded() {
         super.onAdded();
 
-        this.addComponent(new Sprite(Game.resourceLoader.get("lander").tileIdx(0), {xAnchor: 0.5, yAnchor: 0.5}));
+        const landerSpr = this.addComponent(new AnimatedSpriteController(0, [
+            {
+                id: 0,
+                textures: [Game.resourceLoader.get("lander").tileIdx(0)],
+                config: {xAnchor: 0.5, yAnchor: 0.5}
+            },
+            {
+                id: 1,
+                textures: Game.resourceLoader.get("lander").allTiles(),
+                config: {
+                    xAnchor: 0.5, yAnchor: 0.5, animationSpeed: 100
+                },
+            },
+        ]));
         const fireTex = Game.resourceLoader.get("fire");
         const fireSpr = this.addComponent(new AnimatedSpriteController(0, [{
             // Blank
@@ -94,11 +107,12 @@ export class Lander extends Entity {
             if (!inRange.isConnected) {
                 LD59.audio.stop("thrusters");
                 fireSpr.setAnimation(0, false);
+                landerSpr.setAnimation(0, false);
                 LD59.audio.play("out_of_range");
 
                 return;
             }
-
+            landerSpr.setAnimation(1, false);
             LD59.audio.stop("out_of_range");
 
             if (Game.keyboard.isKeyDown(Key.KeyA)) {
@@ -137,8 +151,7 @@ export class Lander extends Entity {
 
             } else {
                 Log.info("Angle too extreme", ang);
-                LD59.STATE = GameState.Dead;
-                this.deadMsg(caller.getScene());
+                this.crashLander(caller);
             }
             this.scene.getGlobalSystem<GameTimerSystem>(GameTimerSystem)?.destroy();
             caller.destroy();
@@ -150,46 +163,51 @@ export class Lander extends Entity {
         col.onTriggerWithLayer(Layers.SOLIDS, (caller, data) => {
 
             // DEAD
-            caller.parent.getComponent(Rigidbody)?.destroy();
-            caller.parent.getComponent(SimplePhysicsBody)?.destroy();
-            caller.destroy();
-            data.other.getEntity().addComponent(new RenderCircle({radius: 10}));
-            LD59.STATE = GameState.Dead;
-            this.deadMsg(caller.getScene());
-            this.scene.getGlobalSystem<GameTimerSystem>(GameTimerSystem)?.destroy();
-
-            caller.parent.addComponent(new Timer(100, null)).onTrigger.register(() => {
-                const debrisTex = Game.resourceLoader.get("lander_broken")
-                for (let i = 0; i < 16; i++) {
-                    const e = this.scene.addEntity(new Entity("debris", caller.parent.transform.x, caller.parent.transform.y, Layers.DEBRIS));
-                    e.addComponent(new Sprite(debrisTex.tileIdx(i % 8), {
-                        rotation: MathUtil.degToRad(MathUtil.randomRange(0, 360)),
-                        xAnchor: 0.5,
-                        yAnchor: 0.5
-                    }));
-                    const motion = MathUtil.lengthDirXY(MathUtil.randomRange(1, 9) * 0.01, MathUtil.degToRad(MathUtil.randomRange(0, 360)));
-                    const phys = e.addComponent(new SimplePhysicsBody({
-                        angCap: 5,
-                        linCap: 5,
-                        linDrag: 0,
-                        angDrag: 0
-                    }))
-                    phys.move(motion.x, motion.y);
-                    phys.rotate(MathUtil.degToRad(MathUtil.randomRange(0, 10) * 0.1));
-                    e.addComponent(new Rigidbody());
-                }
-                caller.parent.destroy();
-            });
-            this.scene.addEntity(new Entity("debris", caller.parent.transform.x, caller.parent.transform.y, Layers.EXPLOSION))
-                .addComponent(new AnimatedSprite(Game.resourceLoader.get("explosion").allTiles(), {
-                    xAnchor: 0.5,
-                    yAnchor: 0.5,
-                    rotation: MathUtil.degToRad(MathUtil.randomRange(0, 360)),
-                    animationSpeed: 80,
-                    animationEndEvent: (s) => s.parent.destroy()
-                }))
-            LD59.audio.play("crash", false);
+            this.crashLander(caller);
         });
+    }
+
+    private crashLander(caller: SatCollider) {
+        LD59.audio.stop("thrusters");
+        this.scene.getGlobalSystem<GameTimerSystem>(GameTimerSystem)?.destroy();
+        caller.parent.addComponent(new ScreenShake(0.5, 1500));
+        caller.parent.getComponent(Rigidbody)?.destroy();
+        caller.parent.getComponent(SimplePhysicsBody)?.destroy();
+        caller.destroy();
+        LD59.STATE = GameState.Dead;
+        this.deadMsg(caller.getScene());
+
+        caller.parent.addComponent(new Timer(100, null)).onTrigger.register(() => {
+            const debrisTex = Game.resourceLoader.get("lander_broken")
+            for (let i = 0; i < 16; i++) {
+                const e = this.scene.addEntity(new Entity("debris", caller.parent.transform.x, caller.parent.transform.y, Layers.DEBRIS));
+                e.addComponent(new Sprite(debrisTex.tileIdx(i % 8), {
+                    rotation: MathUtil.degToRad(MathUtil.randomRange(0, 360)),
+                    xAnchor: 0.5,
+                    yAnchor: 0.5
+                }));
+                const motion = MathUtil.lengthDirXY(MathUtil.randomRange(1, 9) * 0.01, MathUtil.degToRad(MathUtil.randomRange(0, 360)));
+                const phys = e.addComponent(new SimplePhysicsBody({
+                    angCap: 5,
+                    linCap: 5,
+                    linDrag: 0,
+                    angDrag: 0
+                }))
+                phys.move(motion.x, motion.y);
+                phys.rotate(MathUtil.degToRad(MathUtil.randomRange(0, 10) * 0.1));
+                e.addComponent(new Rigidbody());
+            }
+            caller.parent.destroy();
+        });
+        this.scene.addEntity(new Entity("explosion", caller.parent.transform.x, caller.parent.transform.y, Layers.EXPLOSION))
+            .addComponent(new AnimatedSprite(Game.resourceLoader.get("explosion").allTiles(), {
+                xAnchor: 0.5,
+                yAnchor: 0.5,
+                rotation: MathUtil.degToRad(MathUtil.randomRange(0, 360)),
+                animationSpeed: 80,
+                animationEndEvent: (s) => s.parent.destroy()
+            }))
+        LD59.audio.play("crash", false);
     }
 
     private deadMsg(scene: Scene) {
@@ -208,7 +226,7 @@ export class Lander extends Entity {
     }
 
     private winMsg(scene: Scene) {
-        scene.addGUIEntity(new Entity("retryinstr")).addComponent(
+        scene.addGUIEntity(new Entity("retryinstr", 0, 0, Layers.GUI)).addComponent(
             new TextDisp(Game.GAME_WIDTH / 2, 60, "Nice\nPress Space go to next level\nor R/E to replay", {
                 fontFamily: "retro",
                 fill: 0xffffff,

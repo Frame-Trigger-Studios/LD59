@@ -10,28 +10,31 @@ import {
     MathUtil,
     SatCollisionSystem,
     Scene,
+    ScreenShaker,
     SimplePhysics,
     Sprite,
     TextDisp,
-    TimerSystem, Util
+    TimerSystem,
+    Util
 } from "lagom-engine";
 import {SoundManager} from "./util/SoundManager";
 import {LevelLoader} from "./LevelLoad";
 import {AntennaRotator, MouseTracker} from "./antenna";
 import {AntennaDisp, GameTimer, GameTimerSystem} from "./scoring/Scoring";
-import {AudioAtlas} from "lagom-engine/dist/Audio/AudioAtlas";
 
 export enum Layers {
     BACKGROUND,
-    SHIP,
+    ANT_PLACER,
     ANTENNA_OBJ,
     ANTENNA_PROBING,
     LOS_PROBE,
     PAD,
-    DEBRIS,
+    SHIP,
     EXPLOSION,
     SOLIDS,
+    DEBRIS,
     CLICK,
+    GUI
 }
 
 export enum Palette {
@@ -50,7 +53,7 @@ class TitleScene extends Scene {
         this.addGlobalSystem(new TimerSystem());
         this.addGlobalSystem(new FrameTriggerSystem());
 
-        this.addGUIEntity(new Entity("title")).addComponent(
+        this.addGUIEntity(new Entity("title", 0, 0, Layers.GUI)).addComponent(
             new TextDisp(100, 10, "GAME NAME", {
                 fontFamily: "retro",
                 fill: 0xffffff,
@@ -71,9 +74,12 @@ class MainScene extends Scene {
     onAdded() {
         super.onAdded();
 
+        SatCollisionSystem.DEBUG_DRAW = false;
+
         MainScene.sound = this.addGUIEntity(new SoundManager());
         this.addGUIEntity(new SoundManager());
         this.addGlobalSystem(new TimerSystem());
+        this.addGlobalSystem(new ScreenShaker(LD59.GAME_WIDTH / 2, LD59.GAME_HEIGHT / 2));
         this.addGlobalSystem(new FrameTriggerSystem());
 
         this.addSystem(new SimplePhysics());
@@ -104,7 +110,7 @@ class MainScene extends Scene {
             }
         }
 
-        const text = this.addGUIEntity(new Entity("title"));
+        const text = this.addGUIEntity(new Entity("title", 0, 0, Layers.GUI));
         text.addComponent(
             new TextDisp(Game.GAME_WIDTH / 2, 20, "Click to Add an Antenna", {
                 fontFamily: "retro",
@@ -120,9 +126,9 @@ class MainScene extends Scene {
             }),
         ).pixiObj.anchor.set(0.5);
 
-        const mouse = this.addEntity(new MouseTracker("mouse", 0, 0));
-        this.addGUIEntity(new AntennaDisp(LD59.GAME_WIDTH - 30, 55));
-        this.addGUIEntity(new GameTimer(LD59.GAME_WIDTH - 30, 25));
+        const mouse = this.addEntity(new MouseTracker("mouse", 0, 0, Layers.ANT_PLACER));
+        this.addGUIEntity(new AntennaDisp(LD59.GAME_WIDTH - 30, 55, Layers.GUI));
+        this.addGUIEntity(new GameTimer(LD59.GAME_WIDTH - 30, 25, Layers.GUI));
 
         if (LD59.STATE == GameState.AutoStart) {
             this.addGlobalSystem(new GameTimerSystem());
@@ -193,7 +199,6 @@ class MainScene extends Scene {
         this.addGlobalSystem(new SatCollisionSystem(matrix));
         this.addGlobalSystem(new AntennaRotator());
 
-        SatCollisionSystem.DEBUG_DRAW = false;
 
         this.addEntity(new LevelLoader(LD59.CURRENT_LEVEL));
 

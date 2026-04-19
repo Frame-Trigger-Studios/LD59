@@ -9,7 +9,7 @@
         "deploy": "tsc && vite build && butler push dist quackqack/ld59:html5"
     },
     "dependencies": {
-        "lagom-engine": "^2.0.0-beta.7"
+        "lagom-engine": "^2.0.0-beta.8"
     },
     "devDependencies": {
         "typescript": "^5.9.3",

@@ -7,7 +7,7 @@ import {Antenna} from "./antenna";
 
 export class Tile extends Entity {
     constructor(readonly tileId: number, readonly x: number, readonly y: number) {
-        super("tile", x, y);
+        super("tile", x, y, Layers.SOLIDS);
     }
 
     onAdded() {

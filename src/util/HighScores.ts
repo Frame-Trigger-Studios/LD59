@@ -1,4 +1,4 @@
-import { ActionOnPress, Component, Entity, Game, Key, newSystem, RenderRect, Scene, TextDisp, types } from "lagom-engine";
+import {ActionOnPress, Component, Entity, Game, Key, newSystem, RenderRect, Scene, TextDisp, types} from "lagom-engine";
 
 // TODO make this more generic
 // TODO update values before use
@@ -14,8 +14,8 @@ export async function submitScore(name: string, score: number) {
     try {
         const resp = await fetch(submitUrl, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, score, hash }),
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({name, score, hash}),
             signal: AbortSignal.timeout(5000),
         });
         return resp.ok;
@@ -56,7 +56,8 @@ class NameComp extends Component {
     static index: number = 0;
 }
 
-class RenderName extends TextDisp {}
+class RenderName extends TextDisp {
+}
 
 export class SubmitScore extends Entity {
     constructor(readonly score: number) {

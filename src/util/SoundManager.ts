@@ -1,4 +1,5 @@
 import { AnimatedSpriteController, Button, Component, CType, Entity, Game, Key, System, Timer } from "lagom-engine";
+import {Layers} from "../LD59";
 
 class MuteComp extends Component {}
 
@@ -21,7 +22,7 @@ class MuteListener extends System<[AnimatedSpriteController, MuteComp]> {
 
 export class SoundManager extends Entity {
     constructor() {
-        super("audio", Game.GAME_WIDTH - 16 - 8, Game.GAME_HEIGHT - 24, 0);
+        super("audio", Game.GAME_WIDTH - 16 - 8, Game.GAME_HEIGHT - 24, Layers.GUI);
     }
 
     onAdded(): void {

@@ -1,4 +1,5 @@
 import {
+    AnimatedSpriteController,
     Button,
     CircleSatCollider,
     Component,
@@ -13,17 +14,20 @@ import {
     Sprite,
     Timer
 } from "lagom-engine";
-import {Layers, LD59} from "./LD59";
+import {Layers, LD59, Palette} from "./LD59";
 import {Connected} from "./Lander";
 import {AntennaDisp, NumAntennas} from "./scoring/Scoring";
 
-export class RotateToPlayerSprite extends Sprite {
+export class RotateToPlayerSprite extends AnimatedSpriteController {
     radDir = 0;
     connected = false;
 }
 
 class Probe extends PolySatCollider {
     dead = false;
+}
+
+class RenderInRange extends RenderCircle {
 }
 
 export class Antenna extends Entity {
@@ -40,14 +44,31 @@ export class Antenna extends Entity {
             yAnchor: 0.5,
             rotation: MathUtil.degToRad((this.rot + 2) * 90)
         }));
-        const rotator = this.addComponent(new RotateToPlayerSprite(Game.resourceLoader.get("antenna").tileIdx(1), {
-            xAnchor: 0.5,
-            yAnchor: 0.5,
-            rotation: MathUtil.degToRad((this.rot + 2) * 90)
-        }));
+        const antennaTex = Game.resourceLoader.get("antenna_active");
+        const rotator = this.addComponent(new RotateToPlayerSprite(0, [
+            {
+                id: 0,
+                textures: [antennaTex.tileIdx(0)],
+                config: {
+                    xAnchor: 0.5,
+                    yAnchor: 1,
+                    rotation: MathUtil.degToRad((this.rot + 2) * 90)
+                }
+            },
+            {
+                id: 1,
+                textures: antennaTex.tileSlice(1, 7),
+                config: {
+                    xAnchor: 0.5,
+                    yAnchor: 1,
+                    rotation: MathUtil.degToRad((this.rot + 2) * 90),
+                    animationSpeed: 100
+                }
+            }]));
         this.addComponent(new CircleSatCollider({layer: Layers.ANTENNA_OBJ, radius: 8}))
 
-        this.addComponent(new RenderCircle({radius: Antenna.ANT_DIST}));
+        const outline = this.addComponent(new RenderInRange({radius: Antenna.ANT_DIST}));
+        outline.setStyle({lineColour: Palette.PINK, lineAlpha: 0.5});
 
         this.addComponent(new Timer(100, rotator, true)).onTrigger.register((caller, rotator) => {
             const player = this.getScene().getEntityWithName("lander");
@@ -55,9 +76,13 @@ export class Antenna extends Entity {
                 return;
             }
 
+
             // Check distance to player
             const dist = MathUtil.pointDistance(caller.parent.transform.x, caller.parent.transform.y,
                 player.transform.x, player.transform.y);
+
+            const alpha = Math.max(0, Math.min(0.3 * (1 - (dist - 100) / 50), 0.3));
+            outline.setStyle({lineAlpha: alpha});
 
             // In range, spawn the line of sight checker
             if (dist < Antenna.ANT_DIST) {
@@ -87,7 +112,15 @@ export class Antenna extends Entity {
     }
 }
 
-class HoverSprite extends Sprite {
+class HoverSprite
+    extends Sprite {
+}
+
+class HoverSprite2 extends Sprite {
+}
+
+
+class HoverCircle extends RenderCircle {
 }
 
 export class MouseTracker extends Entity {
@@ -104,11 +137,24 @@ export class MouseTracker extends Entity {
             xOffset: 8,
             yOffset: 8
         }));
+        this.addComponent(new HoverSprite2(Game.resourceLoader.get("antenna").tileIdx(1), {
+            alpha: 0.5,
+            xAnchor: 0.5,
+            yAnchor: 0.5,
+            xOffset: 8,
+            yOffset: 8
+        }));
+
+        this.addComponent(new HoverCircle({
+            radius: Antenna.ANT_DIST,
+            xOff: 8,
+            yOff: 8
+        })).setStyle({lineColour: Palette.PINK});
 
         // Add colliders for the blocks surrounding us so we know what to snap to.
         let c = this.addComponent(new CircleSatCollider({
             layer: Layers.ANTENNA_PROBING,
-            radius: 2,
+            radius: 5,
             xOff: 8,
             yOff: -8
         }));
@@ -124,7 +170,7 @@ export class MouseTracker extends Entity {
         });
         c = this.addComponent(new CircleSatCollider({
             layer: Layers.ANTENNA_PROBING,
-            radius: 2,
+            radius: 5,
             xOff: 8,
             yOff: 24
         }));
@@ -140,7 +186,7 @@ export class MouseTracker extends Entity {
         });
         c = this.addComponent(new CircleSatCollider({
             layer: Layers.ANTENNA_PROBING,
-            radius: 2,
+            radius: 5,
             yOff: 8,
             xOff: -8
         }));
@@ -157,7 +203,7 @@ export class MouseTracker extends Entity {
         });
         c = this.addComponent(new CircleSatCollider({
             layer: Layers.ANTENNA_PROBING,
-            radius: 2,
+            radius: 5,
             yOff: 8,
             xOff: 24
         }));
@@ -172,16 +218,21 @@ export class MouseTracker extends Entity {
             }
         });
 
-        this.scene.addFnSystem([HoverSprite], (delta, entity, sprite) => {
+        this.scene.addFnSystem([HoverSprite, HoverSprite2, HoverCircle], (delta, entity, sprite, sprite2, circle) => {
             // TODO engine: fix canvas pos when the game is scaled
             const pos = Game.mouse.canvasPos().divide(2);
 
             // if we are adjacent to a full block but inside an angled block this will show that placement is valid but
             // it won't actually allow it.
+            // TODO fix this if time
             if (this.snapDir === null) {
                 sprite.applyConfig({alpha: 0.3})
+                sprite2.applyConfig({alpha: 0.3})
+                circle.setStyle({lineAlpha: 0.1});
             } else {
                 sprite.applyConfig({alpha: 0.8, rotation: MathUtil.degToRad((this.snapDir + 2) * 90)})
+                sprite2.applyConfig({alpha: 0.8, rotation: MathUtil.degToRad((this.snapDir + 2) * 90)})
+                circle.setStyle({lineAlpha: 1});
             }
 
             // snap to grid
@@ -205,7 +256,7 @@ class ClickDetector extends Entity {
 
     onAdded() {
         // Antenna exists, delete it.
-         const coll = this.addComponent(new CircleSatCollider({radius: 2, layer: Layers.CLICK}));
+        const coll = this.addComponent(new CircleSatCollider({radius: 5, layer: Layers.CLICK}));
         coll.onTrigger.register((caller, data) => {
             if (data.other.layer === Layers.SOLIDS) {
                 this.destroy();
@@ -241,11 +292,13 @@ export class AntennaRotator extends GlobalSystem<[RotateToPlayerSprite[]]> {
         connected!.isConnected = false;
         this.runOnComponents(sprites => {
             sprites.forEach(sprite => {
-                const rot = sprite.pixiObj.rotation;
+                const rot = sprite.sprite?.pixiObj.rotation ?? 0;
                 if (sprite.connected) {
+                    sprite.setAnimation(1);
                     sprite.applyConfig({rotation: MathUtil.angleLerp(rot, -sprite.radDir, delta * 0.01)})
                     connected!.isConnected = true;
                 } else {
+                    sprite.setAnimation(0);
                     sprite.applyConfig({rotation: MathUtil.angleLerp(rot, rot + 0.3, delta * 0.01)})
                 }
             })
