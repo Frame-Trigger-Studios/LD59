@@ -1,82 +1,162 @@
-import {
-    Button,
-    CircleSatCollider,
-    Component,
-    CType,
-    Entity,
-    Game,
-    GlobalSystem,
-    RenderCircle,
-    RenderRect,
-    System,
-    Timer
-} from "lagom-engine";
+import {Button, CircleSatCollider, Entity, Game, MathUtil, RectSatCollider, Sprite, Timer} from "lagom-engine";
 import {Layers} from "./LD59";
+
+export class RotateToPlayerSprite extends Sprite {
+}
 
 export class Antenna extends Entity {
 
-    constructor(x: number, y: number, depth: number) {
+    constructor(x: number, y: number, depth: number, readonly rot: number) {
         super("antenna", x, y, depth);
     }
 
     onAdded() {
-        const width = 10;
-        const height = 30;
-        this.addComponent(new RenderRect({width: width, height: height}, 0xff0000, 0x000000));
-
-        const radius = 10;
-        const deleteButton = this.addChild(new Entity("deleteButton", 0, 0, Layers.ANTENNA_DESTROY));
-        deleteButton.addComponent(new RenderCircle({
-            radius: radius,
-            xOff: width / 2,
-            yOff: height + radius + 10
-        }, 0xffffff, 0xff0000));
-        deleteButton.addComponent(new CircleSatCollider({
-            radius: radius,
-            xOff: width / 2,
-            yOff: height + radius + 10,
-            layer: Layers.ANTENNA_DESTROY
+        this.addComponent(new Sprite(Game.resourceLoader.get("antenna").tileIdx(0), {
+            xAnchor: 0.5,
+            yAnchor: 0.5,
+            rotation: MathUtil.degToRad((this.rot + 2) * 90)
         }));
+        this.addComponent(new RotateToPlayerSprite(Game.resourceLoader.get("antenna").tileIdx(1), {
+            xAnchor: 0.5,
+            yAnchor: 0.5,
+            rotation: MathUtil.degToRad((this.rot + 2) * 90)
+        }));
+        this.addComponent(new CircleSatCollider({layer: Layers.ANTENNA_OBJ, radius: 8}))
+    }
+}
+
+class HoverSprite extends Sprite {
+}
+
+export class MouseTracker extends Entity {
+
+    snapDir: number | null = null;
+
+    onAdded() {
+        super.onAdded();
+
+        this.addComponent(new HoverSprite(Game.resourceLoader.get("antenna").tileIdx(0), {
+            alpha: 0.5,
+            xAnchor: 0.5,
+            yAnchor: 0.5,
+            xOffset: 8,
+            yOffset: 8
+        }));
+
+        // Add colliders for the blocks surrounding us so we know what to snap to.
+        let c = this.addComponent(new CircleSatCollider({
+            layer: Layers.ANTENNA_PROBING,
+            radius: 2,
+            xOff: 8,
+            yOff: -8
+        }));
+        c.onTriggerWithLayer(Layers.SOLIDS, (caller, data) => {
+            if (data.other instanceof RectSatCollider) {
+                this.snapDir = 0;
+            }
+        });
+        c.onTriggerExitWithLayer(Layers.SOLIDS, (caller, data) => {
+            if (data.other instanceof RectSatCollider && this.snapDir === 0) {
+                this.snapDir = null;
+            }
+        });
+        c = this.addComponent(new CircleSatCollider({
+            layer: Layers.ANTENNA_PROBING,
+            radius: 2,
+            xOff: 8,
+            yOff: 24
+        }));
+        c.onTriggerWithLayer(Layers.SOLIDS, (caller, data) => {
+            if (data.other instanceof RectSatCollider) {
+                this.snapDir = 2;
+            }
+        });
+        c.onTriggerExitWithLayer(Layers.SOLIDS, (caller, data) => {
+            if (data.other instanceof RectSatCollider && this.snapDir === 2) {
+                this.snapDir = null;
+            }
+        });
+        c = this.addComponent(new CircleSatCollider({
+            layer: Layers.ANTENNA_PROBING,
+            radius: 2,
+            yOff: 8,
+            xOff: -8
+        }));
+
+        c.onTriggerWithLayer(Layers.SOLIDS, (caller, data) => {
+            if (data.other instanceof RectSatCollider) {
+                this.snapDir = 3;
+            }
+        });
+        c.onTriggerExitWithLayer(Layers.SOLIDS, (caller, data) => {
+            if (data.other instanceof RectSatCollider && this.snapDir === 3) {
+                this.snapDir = null;
+            }
+        });
+        c = this.addComponent(new CircleSatCollider({
+            layer: Layers.ANTENNA_PROBING,
+            radius: 2,
+            yOff: 8,
+            xOff: 24
+        }));
+        c.onTriggerWithLayer(Layers.SOLIDS, (caller, data) => {
+            if (data.other instanceof RectSatCollider) {
+                this.snapDir = 1;
+            }
+        });
+        c.onTriggerExitWithLayer(Layers.SOLIDS, (caller, data) => {
+            if (data.other instanceof RectSatCollider && this.snapDir === 1) {
+                this.snapDir = null;
+            }
+        });
+
+        this.scene.addFnSystem([HoverSprite], (delta, entity, sprite) => {
+            // TODO engine: fix canvas pos when the game is scaled
+            const pos = Game.mouse.canvasPos().divide(2);
+
+            if (this.snapDir === null) {
+                sprite.applyConfig({alpha: 0.3})
+            } else {
+                sprite.applyConfig({alpha: 0.8, rotation: MathUtil.degToRad((this.snapDir + 2) * 90)})
+            }
+
+            // snap to grid
+            const x = Math.floor(pos.x / 16) * 16 + 8;
+            const y = Math.floor(pos.y / 16) * 16 + 8;
+            entity.transform.x = x - 8;
+            entity.transform.y = y - 8;
+
+            if (Game.mouse.isButtonPressed(Button.LEFT) && this.snapDir !== null) {
+                entity.scene.addEntity(new ClickDetector(x, y, this.snapDir));
+            }
+        });
     }
 }
 
 class ClickDetector extends Entity {
 
-    constructor(x: number, y: number, depth: number) {
-        super("clickDetector", x, y, depth);
+    constructor(x: number, y: number, readonly snapDir: number) {
+        super("clickDetector", x, y);
     }
 
     onAdded() {
-        this.addComponent(new CircleSatCollider({radius: 10, layer: Layers.CLICK})).onTrigger
-            .register((caller, data) => {
-                data.other.parent.parent?.addComponent(new ClickAndDestroy());
+        // Antenna exists, delete it.
+        const coll = this.addComponent(new CircleSatCollider({radius: 2, layer: Layers.CLICK}));
+        coll.onTrigger.register((caller, data) => {
+            if (data.other.layer === Layers.SOLIDS) {
                 this.destroy();
-            });
-        this.addComponent(new Timer(20, null, false)).onTrigger.register(caller => {
-            const pos = Game.mouse.canvasPos().divide(2);
-            this.getScene().addEntity(new Antenna(pos.x, pos.y, Layers.ANTENNA));
+            }
+            if (data.other.layer === Layers.ANTENNA_OBJ) {
+                data.other.parent.destroy();
+                this.destroy();
+            }
+        });
+
+        // If this triggers, there wasn't an antenna here
+        this.addComponent(new Timer(50, coll, false)).onTrigger.register((caller, data) => {
+            data.destroy();
+            this.getScene().addEntity(new Antenna(this.transform.x, this.transform.y, Layers.ANTENNA_OBJ, this.snapDir));
+            this.destroy();
         })
-    }
-}
-
-class ClickAndDestroy extends Component {
-}
-
-export class ClickSpawnSystem extends GlobalSystem<[]> {
-    types: [] = [];
-
-    update(delta: number): void {
-        if (Game.mouse.isButtonPressed(Button.LEFT)) {
-            const pos = Game.mouse.canvasPos().divide(2);
-            this.getScene().addEntity(new ClickDetector(pos.x, pos.y, Layers.CLICK));
-        }
-    }
-}
-
-export class ClickDetectionSystem extends System<[ClickAndDestroy]> {
-    types: [CType<ClickAndDestroy>] = [ClickAndDestroy];
-
-    runOnEntities(delta: number, entity: Entity, args: ClickAndDestroy): void {
-        entity.destroy();
     }
 }

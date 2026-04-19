@@ -15,12 +15,12 @@ import {
 } from "lagom-engine";
 import {SoundManager} from "./util/SoundManager";
 import {LevelLoader} from "./LevelLoad";
-import {ClickDetectionSystem, ClickSpawnSystem} from "./antenna";
+import {MouseTracker} from "./antenna";
 
 export enum Layers {
     SHIP,
-    ANTENNA,
-    ANTENNA_DESTROY,
+    ANTENNA_OBJ,
+    ANTENNA_PROBING,
     PAD,
     SOLIDS,
     CLICK,
@@ -74,7 +74,7 @@ class MainScene extends Scene {
                 fill: 0xffffff,
             }),
         ).pixiObj.anchor.set(0.5);
-        ;
+
         text.addComponent(
             new TextDisp(Game.GAME_WIDTH / 2, Game.GAME_HEIGHT - 20, "Press Space to Start", {
                 fontFamily: "retro",
@@ -82,9 +82,13 @@ class MainScene extends Scene {
                 align: "center"
             }),
         ).pixiObj.anchor.set(0.5);
+
+        const mouse = this.addEntity(new MouseTracker("mouse", 0, 0));
         this.addSystem(new ActionOnPress((system) => {
             this.getEntityWithName("lander_placeholder")?.destroy();
             text.destroy();
+            mouse.destroy();
+            // TODO engine: this should be built in to ActionOnPress (optional)
             system.destroy();
 
         }, [Key.Space]));
@@ -92,12 +96,11 @@ class MainScene extends Scene {
         const matrix = new CollisionMatrix();
         matrix.addCollision(Layers.SHIP, Layers.SOLIDS);
         matrix.addCollision(Layers.SHIP, Layers.PAD);
-        matrix.addCollision(Layers.CLICK, Layers.ANTENNA_DESTROY);
+        matrix.addCollision(Layers.CLICK, Layers.ANTENNA_OBJ);
+        matrix.addCollision(Layers.CLICK, Layers.SOLIDS);
+        matrix.addCollision(Layers.SOLIDS, Layers.ANTENNA_PROBING);
 
         this.addGlobalSystem(new SatCollisionSystem(matrix));
-        this.addGlobalSystem(new ClickSpawnSystem());
-
-        this.addSystem(new ClickDetectionSystem());
 
         this.addEntity(new LevelLoader(1));
 
@@ -116,7 +119,7 @@ export class LD59 extends Game {
         super({
             width: 640,
             height: 360,
-            resolution: 1,
+            resolution: 2,
             backgroundColor: 0x292831,
         });
 
