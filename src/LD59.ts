@@ -149,7 +149,7 @@ class MainScene extends Scene {
         this.addGlobalSystem(new SatCollisionSystem(matrix));
         this.addGlobalSystem(new AntennaRotator());
 
-        SatCollisionSystem.DEBUG_DRAW = true;
+        SatCollisionSystem.DEBUG_DRAW = false;
 
         this.addEntity(new LevelLoader(LD59.CURRENT_LEVEL));
 

@@ -8,7 +8,7 @@ import {
     LagomType,
     MathUtil,
     PolySatCollider,
-    RectSatCollider,
+    RectSatCollider, RenderCircle,
     Sprite,
     Timer
 } from "lagom-engine";
@@ -26,6 +26,7 @@ class Probe extends PolySatCollider {
 
 export class Antenna extends Entity {
 
+    static ANT_DIST = 100;
     constructor(x: number, y: number, readonly rot: number) {
         super("antenna", x, y, Layers.ANTENNA_OBJ);
     }
@@ -43,6 +44,8 @@ export class Antenna extends Entity {
         }));
         this.addComponent(new CircleSatCollider({layer: Layers.ANTENNA_OBJ, radius: 8}))
 
+        this.addComponent(new RenderCircle({radius: Antenna.ANT_DIST}));
+
         this.addComponent(new Timer(100, rotator, true)).onTrigger.register((caller, rotator) => {
             const player = this.getScene().getEntityWithName("lander");
             if (player === null) {
@@ -54,7 +57,7 @@ export class Antenna extends Entity {
                 player.transform.x, player.transform.y);
 
             // In range, spawn the line of sight checker
-            if (dist < 200) {
+            if (dist < Antenna.ANT_DIST) {
                 const probe = caller.parent.addComponent(new Probe({
                     layer: Layers.LOS_PROBE,
                     points: [[0, 0], [-caller.parent.transform.x + player.transform.x, -caller.parent.transform.y + player.transform.y]]
