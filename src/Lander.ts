@@ -153,6 +153,7 @@ export class Lander extends Entity {
             // DEAD
             caller.parent.getComponent(Rigidbody)?.destroy();
             caller.parent.getComponent(SimplePhysicsBody)?.destroy();
+            caller.destroy();
             data.other.getEntity().addComponent(new RenderCircle({radius: 10}));
             LD59.STATE = GameState.Dead;
             this.deadMsg(caller.getScene());
