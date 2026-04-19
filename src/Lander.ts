@@ -72,6 +72,7 @@ export class Lander extends Entity {
             body.move(0, Phys.GRAVITY * delta);
 
             if (!inRange.isConnected) {
+                LD59.audio.stop("thrusters4");
                 LD59.audio.play("out_of_range");
                 return;
             }
@@ -89,10 +90,11 @@ export class Lander extends Entity {
                 const moveVector = MathUtil.lengthDirXY(delta * Phys.THRUST, MathUtil.degToRad(-90) + entity.transform.rotation);
                 body.move(moveVector.x, moveVector.y);
                 // sprite.setAnimation(1, false);
-                LD59.audio.play("thrusters");
+                LD59.audio.play("thrusters4");
             } else {
                 // sprite.setAnimation(0, false);
                 // (entity.scene.getEntityWithName("audio") as SoundManager).stopSound("rocket");
+                LD59.audio.stop("thrusters4");
             }
         });
 
@@ -134,6 +136,7 @@ export class Lander extends Entity {
             this.deadMsg(caller.getScene());
             this.scene.getGlobalSystem<GameTimerSystem>(GameTimerSystem)?.destroy();
             LD59.audio.play("crash", false);
+            col.destroy();
         })
     }
 
