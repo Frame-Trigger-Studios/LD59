@@ -21,6 +21,7 @@ export enum Layers {
     SHIP,
     ANTENNA_OBJ,
     ANTENNA_PROBING,
+    LOS_PROBE,
     PAD,
     SOLIDS,
     CLICK,
@@ -99,11 +100,14 @@ class MainScene extends Scene {
         matrix.addCollision(Layers.CLICK, Layers.ANTENNA_OBJ);
         matrix.addCollision(Layers.CLICK, Layers.SOLIDS);
         matrix.addCollision(Layers.SOLIDS, Layers.ANTENNA_PROBING);
+        matrix.addCollision(Layers.SOLIDS, Layers.LOS_PROBE);
 
         this.addGlobalSystem(new SatCollisionSystem(matrix));
         this.addGlobalSystem(new AntennaRotator());
 
         this.addEntity(new LevelLoader(1));
+
+        SatCollisionSystem.DEBUG_DRAW = true;
 
         // Game.audio.startMusic("music", true);
     }

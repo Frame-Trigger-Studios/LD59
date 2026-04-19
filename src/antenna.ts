@@ -7,6 +7,7 @@ import {
     GlobalSystem,
     LagomType,
     MathUtil,
+    PolySatCollider,
     RectSatCollider,
     Sprite,
     Timer
@@ -14,6 +15,12 @@ import {
 import {Layers} from "./LD59";
 
 export class RotateToPlayerSprite extends Sprite {
+    radDir = 0;
+    connected = false;
+}
+
+class Probe extends PolySatCollider {
+    dead = false;
 }
 
 export class Antenna extends Entity {
@@ -28,12 +35,48 @@ export class Antenna extends Entity {
             yAnchor: 0.5,
             rotation: MathUtil.degToRad((this.rot + 2) * 90)
         }));
-        this.addComponent(new RotateToPlayerSprite(Game.resourceLoader.get("antenna").tileIdx(1), {
+        const rotator = this.addComponent(new RotateToPlayerSprite(Game.resourceLoader.get("antenna").tileIdx(1), {
             xAnchor: 0.5,
             yAnchor: 0.5,
             rotation: MathUtil.degToRad((this.rot + 2) * 90)
         }));
         this.addComponent(new CircleSatCollider({layer: Layers.ANTENNA_OBJ, radius: 8}))
+
+        this.addComponent(new Timer(100, rotator, true)).onTrigger.register((caller, rotator) => {
+            const player = this.getScene().getEntityWithName("lander");
+            if (player === null) {
+                return;
+            }
+
+            // Check distance to player
+            const dist = MathUtil.pointDistance(caller.parent.transform.x, caller.parent.transform.y,
+                player.transform.x, player.transform.y);
+
+            // In range, spawn the line of sight checker
+            if (dist < 1000) {
+                const probe = caller.parent.addComponent(new Probe({
+                    layer: Layers.LOS_PROBE,
+                    points: [[0, 0], [-caller.parent.transform.x + player.transform.x, -caller.parent.transform.y + player.transform.y]]
+                }));
+                probe.onTriggerWithLayer(Layers.SOLIDS, () => {
+                    // Hit a wall, we aren't able to see the player.
+                    rotator.connected = false;
+                    probe.dead = true;
+                    probe.destroy();
+                })
+                caller.parent.addComponent(new Timer(50, null)).onTrigger.register((caller1) => {
+                    const activeProbe = caller1.parent.getComponent<Probe>(Probe);
+                    // We didn't hit a wall, so it is connected
+                    if (activeProbe != null && !activeProbe.dead) {
+                        rotator.connected = true;
+                        rotator.radDir = MathUtil.degToRad(90) + MathUtil.pointDirection(player.transform.x, player.transform.y, caller1.parent.transform.x, caller1.parent.transform.y);
+                        activeProbe.destroy();
+                    }
+                });
+            } else {
+                rotator.connected = false;
+            }
+        })
     }
 }
 
@@ -185,15 +228,9 @@ export class AntennaRotator extends GlobalSystem<[RotateToPlayerSprite[]]> {
         }
         this.runOnComponents(sprites => {
             sprites.forEach(sprite => {
-                const dist = MathUtil.pointDistance(sprite.parent.transform.x, sprite.parent.transform.y,
-                    player.transform.x, player.transform.y);
                 const rot = sprite.pixiObj.rotation;
-
-                // TODO we could use the LOS stuff too?
-                // TODO fix this value when it is known
-                if (dist < 100) {
-                    const target = MathUtil.degToRad(90) + MathUtil.pointDirection(player.transform.x, player.transform.y, sprite.parent.transform.x, sprite.parent.transform.y);
-                    sprite.applyConfig({rotation: MathUtil.angleLerp(rot, -target, delta * 0.01)})
+                if (sprite.connected) {
+                    sprite.applyConfig({rotation: MathUtil.angleLerp(rot, -sprite.radDir, delta * 0.01)})
                 } else {
                     sprite.applyConfig({rotation: MathUtil.angleLerp(rot, rot + 0.3, delta * 0.01)})
                 }
