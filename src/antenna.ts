@@ -15,6 +15,7 @@ import {
 } from "lagom-engine";
 import {Layers, LD59} from "./LD59";
 import {Connected} from "./Lander";
+import {AntennaDisp, NumAntennas} from "./scoring/Scoring";
 
 export class RotateToPlayerSprite extends Sprite {
     radDir = 0;
@@ -211,15 +212,8 @@ class ClickDetector extends Entity {
             }
             if (data.other.layer === Layers.ANTENNA_OBJ) {
                 console.log(LD59.ANTS.delete(JSON.stringify([this.transform.x, this.transform.y, this.snapDir])));
+                this.getScene().getEntityWithName<AntennaDisp>("antenna_disp")?.getComponent<NumAntennas>(NumAntennas)?.update_antennas();
                 data.other.parent.destroy();
-                for (let tuple: number[][] of LD59.ANTS.entries()) {
-                    const antenna:number[] = tuple[0];
-                    if (antenna[0] == this.transform.x && antenna[1] == this.transform.y && antenna[2] == this.snapDir) {
-                        LD59.ANTS.delete(antenna);
-                        break;
-                    }
-                }
-
                 this.destroy();
             }
         });
@@ -229,6 +223,7 @@ class ClickDetector extends Entity {
             data.destroy();
             this.getScene().addEntity(new Antenna(this.transform.x, this.transform.y, this.snapDir));
             LD59.ANTS.add(JSON.stringify([this.transform.x, this.transform.y, this.snapDir]));
+            this.getScene().getEntityWithName<AntennaDisp>("antenna_disp")?.getComponent<NumAntennas>(NumAntennas)?.update_antennas();
             this.destroy();
         })
     }

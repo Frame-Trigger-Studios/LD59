@@ -16,6 +16,7 @@ import {
 import {SoundManager} from "./util/SoundManager";
 import {LevelLoader} from "./LevelLoad";
 import {AntennaRotator, MouseTracker} from "./antenna";
+import {AntennaDisp, GameTimer, GameTimerSystem} from "./scoring/Scoring";
 
 export enum Layers {
     SHIP,
@@ -85,6 +86,12 @@ class MainScene extends Scene {
         ).pixiObj.anchor.set(0.5);
 
         const mouse = this.addEntity(new MouseTracker("mouse", 0, 0));
+        this.addGUIEntity(new AntennaDisp(LD59.GAME_WIDTH - 30, 55));
+        this.addGUIEntity(new GameTimer(LD59.GAME_WIDTH - 30, 25));
+
+        if (LD59.STATE == GameState.AutoStart) {
+            this.addGlobalSystem(new GameTimerSystem());
+        }
 
         this.addSystem(new ActionOnPress(() => {
             switch (LD59.STATE) {
@@ -93,6 +100,8 @@ class MainScene extends Scene {
                     this.getEntityWithName("lander_placeholder")?.destroy();
                     text.destroy();
                     mouse.destroy();
+
+                    this.addGlobalSystem(new GameTimerSystem());
                     LD59.STATE = GameState.Game;
                     break
                 // Transition from Dead -> Restart (skip planning)

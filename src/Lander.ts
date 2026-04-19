@@ -14,6 +14,7 @@ import {
     TextDisp
 } from "lagom-engine";
 import {GameState, Layers, LD59} from "./LD59";
+import {GameTimerSystem} from "./scoring/Scoring";
 
 
 class Phys {
@@ -106,11 +107,13 @@ export class Lander extends Entity {
                 LD59.STATE = GameState.Win;
                 this.winMsg(caller.getScene());
 
+
             } else {
                 Log.info("Angle too extreme", ang);
                 LD59.STATE = GameState.Dead;
                 this.deadMsg(caller.getScene());
             }
+            this.scene.getGlobalSystem<GameTimerSystem>(GameTimerSystem)?.destroy();
             caller.destroy();
             caller.parent.getComponent(Rigidbody)?.destroy();
             caller.parent.getComponent(SimplePhysicsBody)?.destroy();
@@ -125,6 +128,7 @@ export class Lander extends Entity {
             data.other.getEntity().addComponent(new RenderCircle({radius: 10}));
             LD59.STATE = GameState.Dead;
             this.deadMsg(caller.getScene());
+            this.scene.getGlobalSystem<GameTimerSystem>(GameTimerSystem)?.destroy();
         })
     }
 
