@@ -25,13 +25,13 @@ import {AntennaDisp, GameTimer, GameTimerSystem} from "./scoring/Scoring";
 export enum Layers {
     BACKGROUND,
     ANT_PLACER,
-    ANTENNA_OBJ,
     ANTENNA_PROBING,
     LOS_PROBE,
     PAD,
     SHIP,
     EXPLOSION,
     SOLIDS,
+    ANTENNA_OBJ,
     DEBRIS,
     CLICK,
     GUI
