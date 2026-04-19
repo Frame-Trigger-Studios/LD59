@@ -147,8 +147,9 @@ export class LevelLoader
             }
         });
 
-        LD59.ANTS.forEach(value => {
-            this.getScene().addEntity(new Antenna(value[0], value[1], value[2]));
+        LD59.ANTS.forEach((_, value) => {
+            const data = JSON.parse(value);
+            this.getScene().addEntity(new Antenna(data[0], data[1], data[2]));
         })
 
         this.destroy();
