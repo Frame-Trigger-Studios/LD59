@@ -180,7 +180,9 @@ export class LD59 extends Game {
     };
 
     static STATE = GameState.Planning;
-    static ANTS = new Set<number[]>();
+
+    // tuples aren't hashable??? JS why
+    static ANTS = new Set<string>();
     static CURRENT_LEVEL = 1;
 
     constructor() {

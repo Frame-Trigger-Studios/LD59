@@ -8,7 +8,8 @@ import {
     LagomType,
     MathUtil,
     PolySatCollider,
-    RectSatCollider, RenderCircle,
+    RectSatCollider,
+    RenderCircle,
     Sprite,
     Timer
 } from "lagom-engine";
@@ -27,6 +28,7 @@ class Probe extends PolySatCollider {
 export class Antenna extends Entity {
 
     static ANT_DIST = 100;
+
     constructor(x: number, y: number, readonly rot: number) {
         super("antenna", x, y, Layers.ANTENNA_OBJ);
     }
@@ -202,12 +204,13 @@ class ClickDetector extends Entity {
 
     onAdded() {
         // Antenna exists, delete it.
-        const coll = this.addComponent(new CircleSatCollider({radius: 2, layer: Layers.CLICK}));
+         const coll = this.addComponent(new CircleSatCollider({radius: 2, layer: Layers.CLICK}));
         coll.onTrigger.register((caller, data) => {
             if (data.other.layer === Layers.SOLIDS) {
                 this.destroy();
             }
             if (data.other.layer === Layers.ANTENNA_OBJ) {
+                console.log(LD59.ANTS.delete(JSON.stringify([this.transform.x, this.transform.y, this.snapDir])));
                 data.other.parent.destroy();
                 for (let tuple: number[][] of LD59.ANTS.entries()) {
                     const antenna:number[] = tuple[0];
@@ -225,7 +228,7 @@ class ClickDetector extends Entity {
         this.addComponent(new Timer(50, coll, false)).onTrigger.register((caller, data) => {
             data.destroy();
             this.getScene().addEntity(new Antenna(this.transform.x, this.transform.y, this.snapDir));
-            LD59.ANTS.add([this.transform.x, this.transform.y, this.snapDir]);
+            LD59.ANTS.add(JSON.stringify([this.transform.x, this.transform.y, this.snapDir]));
             this.destroy();
         })
     }
