@@ -17,6 +17,7 @@ import {SoundManager} from "./util/SoundManager";
 import {LevelLoader} from "./LevelLoad";
 import {AntennaRotator, MouseTracker} from "./antenna";
 import {AntennaDisp, GameTimer, GameTimerSystem} from "./scoring/Scoring";
+import {AudioAtlas} from "lagom-engine/dist/Audio/AudioAtlas";
 
 export enum Layers {
     SHIP,
@@ -60,9 +61,12 @@ class TitleScene extends Scene {
 }
 
 class MainScene extends Scene {
+    static sound: SoundManager
+
     onAdded() {
         super.onAdded();
 
+        MainScene.sound = this.addGUIEntity(new SoundManager());
         this.addGUIEntity(new SoundManager());
         this.addGlobalSystem(new TimerSystem());
         this.addGlobalSystem(new FrameTriggerSystem());
@@ -193,6 +197,9 @@ export class LD59 extends Game {
     // tuples aren't hashable??? JS why
     static ANTS = new Set<string>();
     static CURRENT_LEVEL = 1;
+
+    static muted = false;
+    static musicPlaying = false;
 
     constructor() {
         super({
