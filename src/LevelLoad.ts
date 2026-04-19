@@ -1,4 +1,4 @@
-import {Entity, Game, PolySatCollider, RectSatCollider, Sprite, TiledMap, TiledMapLoader} from "lagom-engine";
+import {Entity, Game, MathUtil, PolySatCollider, RectSatCollider, Sprite, TiledMap, TiledMapLoader} from "lagom-engine";
 import levels from "./assets/Levels.json";
 import {LanderPlaceholder} from "./Lander";
 import {LandingPad} from "./LandingPad";
@@ -13,10 +13,20 @@ export class Tile extends Entity {
     onAdded() {
         super.onAdded();
 
-        this.addComponent(new Sprite(Game.resourceLoader.get("tiles").tileIdx(this.tileId), {
-            xAnchor: 0.5,
-            yAnchor: 0.5
-        }));
+        if (this.tileId !== 7) {
+            this.addComponent(new Sprite(Game.resourceLoader.get("tiles").tileIdx(this.tileId), {
+                xAnchor: 0.5,
+                yAnchor: 0.5
+            }));
+        } else {
+            const pos = this.transform.getGlobalPosition();
+            console.log(pos);
+            this.addComponent(new Sprite(Game.resourceLoader.get("square").tileIdx(((pos.x / 64) + (pos.y / 64) * 7) % 8), {
+                xAnchor: 0.5,
+                yAnchor: 0.5,
+                rotation: MathUtil.degToRad(MathUtil.randomRange(0, 4) * 90)
+            }));
+        }
 
         switch (this.tileId) {
             case 4:
