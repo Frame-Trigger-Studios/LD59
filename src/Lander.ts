@@ -17,6 +17,7 @@ import {
 } from "lagom-engine";
 import {GameState, Layers, LD59} from "./LD59";
 import {GameTimerSystem, Score, ScoreDisplay, TimerText} from "./scoring/Scoring";
+import {SoundManager} from "./util/SoundManager";
 
 
 class Phys {
@@ -88,10 +89,14 @@ export class Lander extends Entity {
         this.getScene().addFnSystem([SimplePhysicsBody, Connected], (delta, entity, body: SimplePhysicsBody, inRange: Connected) => {
             // Make sure gravity is applied
             body.move(0, Phys.GRAVITY * delta);
+
             if (!inRange.isConnected) {
                 fireSpr.setAnimation(0, false);
+                LD59.audio.play("out_of_range");
                 return;
             }
+
+            LD59.audio.stop("out_of_range");
 
             if (Game.keyboard.isKeyDown(Key.KeyA)) {
                 body.rotate(MathUtil.degToRad(delta * -Phys.ROT_SPEED));
@@ -103,8 +108,8 @@ export class Lander extends Entity {
             if (Game.keyboard.isKeyDown(Key.KeyW)) {
                 const moveVector = MathUtil.lengthDirXY(delta * Phys.THRUST, MathUtil.degToRad(-90) + entity.transform.rotation);
                 body.move(moveVector.x, moveVector.y);
+                LD59.audio.play("thrusters");
                 fireSpr.setAnimation(1, false);
-                // (entity.scene.getEntityWithName("audio") as SoundManager).playSound("rocket");
             } else {
                 fireSpr.setAnimation(0, false);
             }
@@ -124,6 +129,7 @@ export class Lander extends Entity {
                 Log.info("SAFE")
                 LD59.STATE = GameState.Win;
                 this.winMsg(caller.getScene());
+                LD59.audio.play("landed", false);
 
             } else {
                 Log.info("Angle too extreme", ang);
@@ -146,6 +152,7 @@ export class Lander extends Entity {
             LD59.STATE = GameState.Dead;
             this.deadMsg(caller.getScene());
             this.scene.getGlobalSystem<GameTimerSystem>(GameTimerSystem)?.destroy();
+            LD59.audio.play("crash", false);
         })
     }
 
