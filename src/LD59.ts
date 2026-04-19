@@ -28,6 +28,8 @@ export enum Layers {
     ANTENNA_PROBING,
     LOS_PROBE,
     PAD,
+    DEBRIS,
+    EXPLOSION,
     SOLIDS,
     CLICK,
 }

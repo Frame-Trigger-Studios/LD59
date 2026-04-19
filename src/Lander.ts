@@ -1,4 +1,5 @@
 import {
+    AnimatedSprite,
     AnimatedSpriteController,
     AnimationEnd,
     CircleSatCollider,
@@ -13,7 +14,8 @@ import {
     Scene,
     SimplePhysicsBody,
     Sprite,
-    TextDisp
+    TextDisp,
+    Timer
 } from "lagom-engine";
 import {GameState, Layers, LD59} from "./LD59";
 import {GameTimerSystem, Score, ScoreDisplay, TimerText} from "./scoring/Scoring";
@@ -158,8 +160,39 @@ export class Lander extends Entity {
             LD59.STATE = GameState.Dead;
             this.deadMsg(caller.getScene());
             this.scene.getGlobalSystem<GameTimerSystem>(GameTimerSystem)?.destroy();
+
+            caller.parent.addComponent(new Timer(100, null)).onTrigger.register(() => {
+                const debrisTex = Game.resourceLoader.get("lander_broken")
+                for (let i = 0; i < 16; i++) {
+                    const e = this.scene.addEntity(new Entity("debris", caller.parent.transform.x, caller.parent.transform.y, Layers.DEBRIS));
+                    e.addComponent(new Sprite(debrisTex.tileIdx(i % 8), {
+                        rotation: MathUtil.degToRad(MathUtil.randomRange(0, 360)),
+                        xAnchor: 0.5,
+                        yAnchor: 0.5
+                    }));
+                    const motion = MathUtil.lengthDirXY(MathUtil.randomRange(1, 9) * 0.01, MathUtil.degToRad(MathUtil.randomRange(0, 360)));
+                    const phys = e.addComponent(new SimplePhysicsBody({
+                        angCap: 5,
+                        linCap: 5,
+                        linDrag: 0,
+                        angDrag: 0
+                    }))
+                    phys.move(motion.x, motion.y);
+                    phys.rotate(MathUtil.degToRad(MathUtil.randomRange(0, 10) * 0.1));
+                    e.addComponent(new Rigidbody());
+                }
+                caller.parent.destroy();
+            });
+            this.scene.addEntity(new Entity("debris", caller.parent.transform.x, caller.parent.transform.y, Layers.EXPLOSION))
+                .addComponent(new AnimatedSprite(Game.resourceLoader.get("explosion").allTiles(), {
+                    xAnchor: 0.5,
+                    yAnchor: 0.5,
+                    rotation: MathUtil.degToRad(MathUtil.randomRange(0, 360)),
+                    animationSpeed: 80,
+                    animationEndEvent: (s) => s.parent.destroy()
+                }))
             LD59.audio.play("crash", false);
-        })
+        });
     }
 
     private deadMsg(scene: Scene) {
