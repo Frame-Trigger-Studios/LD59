@@ -62,16 +62,10 @@ export class Lander extends Entity {
             // Blank
             id: 0,
             textures: [fireTex.tileIdx(4)],
-            events: {
-                0: () => LD59.audio.stop("thrusters")
-            }
         }, {
             // Fire
             id: 1,
             textures: fireTex.tileSlice(0, 3),
-            events: {
-                0: () => LD59.audio.play("thrusters")
-            },
             config: {
                 animationEndAction: AnimationEnd.LOOP,
                 xAnchor: 0.5,
@@ -98,6 +92,7 @@ export class Lander extends Entity {
             body.move(0, Phys.GRAVITY * delta);
 
             if (!inRange.isConnected) {
+                LD59.audio.stop("thrusters");
                 fireSpr.setAnimation(0, false);
                 LD59.audio.play("out_of_range");
 
@@ -116,8 +111,10 @@ export class Lander extends Entity {
             if (Game.keyboard.isKeyDown(Key.KeyW)) {
                 const moveVector = MathUtil.lengthDirXY(delta * Phys.THRUST, MathUtil.degToRad(-90) + entity.transform.rotation);
                 body.move(moveVector.x, moveVector.y);
+                LD59.audio.play("thrusters");
                 fireSpr.setAnimation(1, false);
             } else {
+                LD59.audio.stop("thrusters");
                 fireSpr.setAnimation(0, false);
             }
         });
