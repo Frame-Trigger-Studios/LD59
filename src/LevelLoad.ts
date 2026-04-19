@@ -22,10 +22,10 @@ export class Tile extends Entity {
     onAdded() {
         super.onAdded();
 
-        // this.addComponent(new Sprite(Game.resourceLoader.get("tiles").tileIdx(this.tileId), {
-        //     xAnchor: 0.5,
-        //     yAnchor: 0.5
-        // }));
+        this.addComponent(new Sprite(Game.resourceLoader.get("tiles").tileIdx(this.tileId), {
+            xAnchor: 0.5,
+            yAnchor: 0.5
+        }));
 
         const debug = false;
 

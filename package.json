@@ -9,7 +9,7 @@
         "deploy": "tsc && vite build && butler push dist USERNAME/GAMENAME:html5"
     },
     "dependencies": {
-        "lagom-engine": "2.0.0-beta.3"
+        "lagom-engine": "2.0.0-beta.4"
     },
     "devDependencies": {
         "typescript": "^5.9.3",

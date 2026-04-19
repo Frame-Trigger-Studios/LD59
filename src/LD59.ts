@@ -1,4 +1,5 @@
 import {
+    ActionOnPress,
     CollisionMatrix,
     Entity,
     FrameTriggerSystem,
@@ -10,13 +11,11 @@ import {
     Scene,
     SimplePhysics,
     TextDisp,
-    Timer,
     TimerSystem
 } from "lagom-engine";
 import {SoundManager} from "./util/SoundManager";
 import {LevelLoader} from "./LevelLoad";
 import {ClickDetectionSystem, ClickSpawnSystem} from "./antenna";
-import {ActionOnPress} from "./util/ActionOnPress";
 
 export enum Layers {
     SHIP,
