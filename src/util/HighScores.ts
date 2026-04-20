@@ -82,7 +82,7 @@ export class SubmitScore extends Entity {
         );
 
         this.addComponent(
-            new TextDisp(0, 40, "New High Score!", {
+            new TextDisp(0, 40, "New Best Time!", {
                 fontFamily: "retro",
                 fill: Palette.CREAM,
                 fontSize: 14,
@@ -169,7 +169,7 @@ export class HighScores extends Entity {
             ),
         );
         this.addComponent(
-            new TextDisp(0, 40, "HighScores", {
+            new TextDisp(0, 40, "Leaderboard", {
                 fontFamily: "retro",
                 fill: Palette.CREAM,
                 fontSize: 14,
@@ -185,7 +185,7 @@ export class HighScores extends Entity {
         }));
 
         this.addComponent(
-            new TextDisp(-16, 180, this.time.toFixed(0), {
+            new TextDisp(-16, 180, this.time.toFixed(2), {
                 fontFamily: "retro",
                 fill: Palette.CREAM,
                 fontSize: 10,
@@ -206,7 +206,7 @@ export class HighScores extends Entity {
         }));
 
         this.addComponent(
-            new TextDisp(-16, 205, `+${LD59.ANTS.size * 50}  (${LD59.ANTS.size} x 50)`, {
+            new TextDisp(-16, 205, `+${LD59.ANTS.size * 5}  (${LD59.ANTS.size} x 5)`, {
                 fontFamily: "retro",
                 fill: Palette.CREAM,
                 fontSize: 10,
@@ -214,7 +214,7 @@ export class HighScores extends Entity {
         ).pixiObj.anchor.set(0, 0.5);
 
         this.addComponent(
-            new TextDisp(0, 228, `Your Score: ${this.score}`, {
+            new TextDisp(0, 228, `Your Time: ${this.score.toFixed(2)}`, {
                 fontFamily: "retro",
                 fill: Palette.CREAM,
                 fontSize: 10,
@@ -234,7 +234,7 @@ export class HighScores extends Entity {
 
         if (!this.submitSuccess) {
             this.addComponent(
-                new TextDisp(0, 166, "Failed to submit score", {
+                new TextDisp(0, 166, "Failed to submit time", {
                     fontFamily: "retro",
                     fill: Palette.PINK,
                     fontSize: 6,
@@ -245,7 +245,7 @@ export class HighScores extends Entity {
         getScores().then((scores) => {
             if (scores === null) {
                 this.addComponent(
-                    new TextDisp(0, 102, "Error\nFetching Scores", {
+                    new TextDisp(0, 102, "Error\nFetching Leaderboard", {
                         fontFamily: "retro",
                         fill: Palette.CREAM,
                         align: "center",

@@ -15,7 +15,6 @@ import {
     ScreenShake,
     SimplePhysicsBody,
     Sprite,
-    TextDisp,
     Timer
 } from "lagom-engine";
 import {GameState, Layers, LD59} from "./LD59";
@@ -229,7 +228,7 @@ export class Lander extends Entity {
     private winMsg() {
         const time_ms = this.scene.getEntityWithName("level_time")?.getComponent<TimerText>(TimerText)?.time_ms;
         if (time_ms) {
-            const score = Math.floor(time_ms / 10) + LD59.ANTS.size * 50;
+            const score = (time_ms / 1000) + LD59.ANTS.size * 5;
 
             getScores().then(resp => {
 
@@ -240,10 +239,10 @@ export class Lander extends Entity {
                 });
 
                 if (resp === null || (resp.length == 10 && score < resp[9].score)) {
-                    this.scene.addGUIEntity(new HighScores(score, Math.floor(time_ms / 10), true))
+                    this.scene.addGUIEntity(new HighScores(score, (time_ms / 1000), true))
                 } else {
                     // new high score
-                    this.scene.addGUIEntity(new SubmitScore(score, Math.floor(time_ms / 10)));
+                    this.scene.addGUIEntity(new SubmitScore(score, (time_ms / 1000)));
                 }
             })
         }
