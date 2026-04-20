@@ -19,7 +19,7 @@ import {
 } from "lagom-engine";
 import {SoundManager} from "./util/SoundManager";
 import {LevelLoader} from "./LevelLoad";
-import {AntennaRotator, MouseTracker} from "./antenna";
+import {AntennaRotator, MouseTracker, ProxDetector} from "./antenna";
 import {AntennaDisp, GameTimer, GameTimerSystem} from "./scoring/Scoring";
 
 export enum Layers {
@@ -194,6 +194,7 @@ class MainScene extends Scene {
 
         this.addGlobalSystem(new SatCollisionSystem(matrix));
         this.addGlobalSystem(new AntennaRotator());
+        this.addSystem(new ProxDetector());
 
 
         this.addEntity(new LevelLoader(LD59.CURRENT_LEVEL));
@@ -248,7 +249,7 @@ export class LD59 extends Game {
             width: 640,
             height: 360,
             resolution: 2,
-            backgroundColor: Palette.BLUE,
+            backgroundColor: Palette.DARK_BLUE,
         });
 
         // Set the global log level

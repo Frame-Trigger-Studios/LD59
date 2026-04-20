@@ -3,6 +3,7 @@ import {
     Button,
     CircleSatCollider,
     Component,
+    CType,
     Entity,
     Game,
     GlobalSystem,
@@ -12,6 +13,7 @@ import {
     RectSatCollider,
     RenderCircle,
     Sprite,
+    System,
     Timer
 } from "lagom-engine";
 import {Layers, LD59, Palette} from "./LD59";
@@ -69,46 +71,66 @@ export class Antenna extends Entity {
 
         const outline = this.addComponent(new RenderInRange({radius: Antenna.ANT_DIST}));
         outline.setStyle({lineColour: Palette.PINK, lineAlpha: 0.5});
-
-        this.addComponent(new Timer(100, rotator, true)).onTrigger.register((caller, rotator) => {
-            const player = this.getScene().getEntityWithName("lander");
-            if (player === null) {
-                return;
-            }
-
-            // Check distance to player
-            const dist = MathUtil.pointDistance(caller.parent.transform.x, caller.parent.transform.y,
-                player.transform.x, player.transform.y);
-
-            // Set the outline alpha
-            const alpha = Math.max(0, Math.min(0.3 * (1 - (dist - 100) / 50), 0.3));
-
-            const music = Game.resourceLoader.getSound("music");
-
-            const fade_distance = 50;
-
-            // Check outer range for fade in
-            if (dist < Antenna.ANT_DIST + fade_distance) {
-                outline.setStyle({lineAlpha: alpha});
-                rotator.connected = false;
-
-                // Actually in range
-                if (dist < Antenna.ANT_DIST) {
-                    rotator.connected = true;
-                    rotator.radDir = MathUtil.degToRad(90) + MathUtil.pointDirection(player.transform.x, player.transform.y, caller.parent.transform.x, caller.parent.transform.y);
-                } else if (!player.getComponent<Connected>(Connected)?.isConnected) {
-                    const scale_length = 10;
-                    const amount_outside = dist - Antenna.ANT_DIST;
-                    const volume_scale = Math.floor((amount_outside / (fade_distance/scale_length))) + 1;
-                    const increment = LD59.musicVolume / scale_length;
-                    music.volume = LD59.musicVolume - (increment * volume_scale);
-                }
-            } else {
-                rotator.connected = false;
-                outline.setStyle({lineAlpha: 0});
-            }
-        })
     }
+}
+
+export class ProxDetector extends System<[RotateToPlayerSprite, RenderInRange]> {
+
+    music = Game.resourceLoader.getSound("music");
+    vol: number | null = null;
+
+
+    update(delta: number) {
+
+        this.vol = null;
+        super.update(delta);
+        if (this.vol !== null) {
+            this.music.volume = this.vol
+        }
+    }
+
+    runOnEntities(delta: number, entity: Entity, rotator: RotateToPlayerSprite, outline: RenderInRange): void {
+
+        const player = entity.getScene().getEntityWithName("lander");
+        if (player === null) {
+            return;
+        }
+
+        // Check distance to player
+        const dist = MathUtil.pointDistance(entity.transform.x, entity.transform.y,
+            player.transform.x, player.transform.y);
+
+        // Set the outline alpha
+        const alpha = Math.max(0, Math.min(0.3 * (1 - (dist - 100) / 50), 0.3));
+
+
+        const fade_distance = 50;
+
+        // Check outer range for fade in
+        if (dist < Antenna.ANT_DIST + fade_distance) {
+            outline.setStyle({lineAlpha: alpha});
+            rotator.connected = false;
+
+            // Actually in range
+            if (dist < Antenna.ANT_DIST) {
+                rotator.connected = true;
+                rotator.radDir = MathUtil.degToRad(90) + MathUtil.pointDirection(player.transform.x, player.transform.y, entity.transform.x, entity.transform.y);
+            } else if (!player.getComponent<Connected>(Connected)?.isConnected) {
+                const scale_length = 10;
+                const amount_outside = dist - Antenna.ANT_DIST;
+                const volume_scale = Math.floor((amount_outside / (fade_distance / scale_length))) + 1;
+                const increment = LD59.musicVolume / scale_length;
+                this.vol = Math.max(this.vol ?? 0, LD59.musicVolume - (increment * volume_scale));
+            }
+        } else {
+            rotator.connected = false;
+            outline.setStyle({lineAlpha: 0});
+        }
+
+    }
+
+    types: [CType<RotateToPlayerSprite>, CType<RenderInRange>] = [RotateToPlayerSprite, RenderInRange];
+
 }
 
 class HoverSprite
@@ -223,7 +245,7 @@ export class MouseTracker extends Entity {
             yOff: 8,
             xOff: 8
         }));
-        c.onTrigger.register( (caller, data) => {
+        c.onTrigger.register((caller, data) => {
             if (data.other.layer === Layers.SOLIDS || data.other.layer === Layers.PAD) {
                 this.snapDir = null;
             }
