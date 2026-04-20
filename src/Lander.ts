@@ -213,6 +213,11 @@ export class Lander extends Entity {
     }
 
     private deadMsg(scene: Scene) {
+        this.scene.entities.forEach((entity: Entity) => {
+            if (entity.name === "instr") {
+                entity.destroy()
+            }
+        });
         const txt = scene.getEntityWithName("main_text")?.getComponent<TextDisp>(TextDisp);
         if (txt) {
             txt.text = "Ouch! Press Space to restart or E to edit"
