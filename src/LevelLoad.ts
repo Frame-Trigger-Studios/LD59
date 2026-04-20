@@ -30,7 +30,6 @@ export class Tile extends Entity {
             }));
         } else {
             const pos = this.transform.getGlobalPosition();
-            console.log(pos);
             this.addComponent(new Sprite(Game.resourceLoader.get("square").tileIdx(((pos.x / 64) + (pos.y / 64) * 7) % 8), {
                 xAnchor: 0.5,
                 yAnchor: 0.5,

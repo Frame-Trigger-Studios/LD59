@@ -273,7 +273,7 @@ class ClickDetector extends Entity {
                 this.destroy();
             }
             if (data.other.layer === Layers.ANTENNA_OBJ) {
-                console.log(LD59.ANTS.delete(JSON.stringify([this.transform.x, this.transform.y, this.snapDir])));
+                LD59.ANTS.delete(JSON.stringify([this.transform.x, this.transform.y, this.snapDir]));
                 this.getScene().getEntityWithName<AntennaDisp>("antenna_disp")?.getComponent<NumAntennas>(NumAntennas)?.update_antennas();
                 data.other.parent.destroy();
                 this.destroy();

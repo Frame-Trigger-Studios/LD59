@@ -144,7 +144,6 @@ export class Lander extends Entity {
         col.onTriggerWithLayer(Layers.PAD, (caller, data) => {
 
             // It's kinda funny to launch across the map and land on the pad
-            Log.info("SAFE")
             if (LD59.STATE === GameState.Dead || LD59.STATE === GameState.Scoring) {
                 // Stop double collision triggers
                 return;

@@ -52,12 +52,8 @@ class TitleScene extends Scene {
         this.addGlobalSystem(new TimerSystem());
         this.addGlobalSystem(new FrameTriggerSystem());
 
-        this.addGUIEntity(new Entity("title", 0, 0, Layers.GUI)).addComponent(
-            new TextDisp(100, 10, "GAME NAME", {
-                fontFamily: "retro",
-                fill: 0xffffff,
-            }),
-        );
+        this.addGUIEntity(new Entity("title", 0, 0))
+            .addComponent(new Sprite(Game.resourceLoader.get("title").tileIdx(0)));
 
         this.addSystem(
             new ActionOnPress(() => {
@@ -226,7 +222,7 @@ export enum GameState {
 }
 
 export class LD59 extends Game {
-    startScene = () => new MainScene(this);
+    startScene = () => new TitleScene(this);
     resourceLoad = async () => {
         await Game.resourceLoader.autoLoad();
         Log.info("loaded all resources");
@@ -245,7 +241,7 @@ export class LD59 extends Game {
     static muted = false;
     static musicPlaying = false;
     static musicVolume = 0.2;
-    static music = null;
+    static music: any = null;
 
     constructor() {
         super({
