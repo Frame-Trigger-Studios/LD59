@@ -248,7 +248,7 @@ export class LD59 extends Game {
             width: 640,
             height: 360,
             resolution: 2,
-            backgroundColor: 0x292831,
+            backgroundColor: Palette.BLUE,
         });
 
         // Set the global log level
