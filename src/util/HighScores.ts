@@ -1,10 +1,11 @@
-import {ActionOnPress, Component, Entity, Game, Key, newSystem, RenderRect, Scene, TextDisp, types} from "lagom-engine";
+import {Component, Entity, Game, newSystem, RenderRect, Sprite, TextDisp, types} from "lagom-engine";
+import {GameState, LD59, Palette} from "../LD59";
 
 // TODO make this more generic
 // TODO update values before use
 // TODO check the colours
 const submitUrl = "https://quackqack.pythonanywhere.com/GAME/submit";
-const leaderboardUrl = "https://quackqack.pythonanywhere.com/GAME/leaderboard"
+const leaderboardUrl = "https://quackqack.pythonanywhere.com/leaderboard"
 const secret = "";
 
 export async function submitScore(name: string, score: number) {
@@ -60,7 +61,7 @@ class RenderName extends TextDisp {
 }
 
 export class SubmitScore extends Entity {
-    constructor(readonly score: number) {
+    constructor(readonly score: number, readonly time: number) {
         super("submitter", Game.GAME_WIDTH / 2, 0);
     }
 
@@ -70,46 +71,46 @@ export class SubmitScore extends Entity {
         this.addComponent(
             new RenderRect(
                 {
-                    xOff: -40,
-                    yOff: 15,
-                    width: 80,
-                    height: Game.GAME_HEIGHT - 30,
+                    xOff: -80,
+                    yOff: 30,
+                    width: 160,
+                    height: Game.GAME_HEIGHT - 120,
                 },
-                0x3f5e5c,
-                0x6d8d8a,
+                Palette.DARK_BLUE,
+                Palette.BLUE,
             ),
         );
 
         this.addComponent(
-            new TextDisp(0, 20, "New High Score!", {
+            new TextDisp(0, 40, "New High Score!", {
                 fontFamily: "retro",
-                fill: 0xf6edcd,
-                fontSize: 7,
+                fill: Palette.CREAM,
+                fontSize: 14,
             }),
         ).pixiObj.anchor.set(0.5);
 
         this.addComponent(
-            new TextDisp(0, 40, "Enter Name", {
+            new TextDisp(0, 80, "Enter Name", {
                 fontFamily: "retro",
-                fill: 0xf6edcd,
-                fontSize: 6,
+                fill: Palette.CREAM,
+                fontSize: 12,
             }),
         ).pixiObj.anchor.set(0.5);
 
         this.addComponent(
-            new RenderName(0, 50, "___", {
+            new RenderName(0, 100, "___", {
                 fontFamily: "retro",
-                fill: 0xf6edcd,
-                fontSize: 8,
+                fill: Palette.CREAM,
+                fontSize: 16,
             }),
         ).pixiObj.anchor.set(0.5);
 
         this.addComponent(
-            new TextDisp(0, 75, "Press Enter\nto Submit", {
+            new TextDisp(0, 150, "Press Enter\nto Submit", {
                 fontFamily: "retro",
-                fill: 0xe2a97e,
+                fill: Palette.PINK,
                 align: "center",
-                fontSize: 5,
+                fontSize: 10,
             }),
         ).pixiObj.anchor.set(0.5);
 
@@ -128,8 +129,7 @@ export class SubmitScore extends Entity {
                 submitScore(NameComp.letters.slice(0, NameComp.index).join(""), this.score).then((success) => {
                     document.removeEventListener("keydown", updateName);
                     this.destroy();
-                    // TODO make this the main scene
-                    this.scene.addGUIEntity(new HighScores(this.score, success, () => new Scene(this.getScene().game)));
+                    this.scene.addGUIEntity(new HighScores(this.score, this.time, success));
                 });
             }
         };
@@ -147,8 +147,8 @@ export class SubmitScore extends Entity {
 export class HighScores extends Entity {
     constructor(
         readonly score: number,
+        readonly time: number,
         readonly submitSuccess: boolean,
-        readonly mainScene: () => Scene
     ) {
         super("highscores", Game.GAME_WIDTH / 2, 0);
     }
@@ -156,54 +156,88 @@ export class HighScores extends Entity {
     onAdded() {
         super.onAdded();
 
-        this.scene.addSystem(
-            new ActionOnPress(() => {
-                this.scene.game.setScene(this.mainScene());
-            }, [Key.Space]),
-        );
-
         this.addComponent(
             new RenderRect(
                 {
-                    xOff: -40,
-                    yOff: 5,
-                    width: 80,
-                    height: Game.GAME_HEIGHT - 10,
+                    xOff: -80,
+                    yOff: 30,
+                    width: 160,
+                    height: Game.GAME_HEIGHT - 120,
                 },
-                0x3f5e5c,
-                0x6d8d8a,
+                Palette.DARK_BLUE,
+                Palette.BLUE,
             ),
         );
         this.addComponent(
-            new TextDisp(0, 10, "HighScores", {
+            new TextDisp(0, 40, "HighScores", {
                 fontFamily: "retro",
-                fill: 0xf6edcd,
-                fontSize: 7,
+                fill: Palette.CREAM,
+                fontSize: 14,
             }),
         ).pixiObj.anchor.set(0.5);
 
+        // Add score breakdown
+        this.addComponent(new Sprite(Game.resourceLoader.get("stopwatch").tileIdx(0), {
+            xAnchor: 0.5,
+            yAnchor: 0.5,
+            xOffset: -36,
+            yOffset: 180
+        }));
+
         this.addComponent(
-            new TextDisp(0, 79, `Your Score: ${this.score}`, {
+            new TextDisp(-16, 180, this.time.toFixed(0), {
                 fontFamily: "retro",
-                fill: 0xf6edcd,
-                fontSize: 5,
+                fill: Palette.CREAM,
+                fontSize: 10,
+            }),
+        ).pixiObj.anchor.set(0, 0.5);
+
+        this.addComponent(new Sprite(Game.resourceLoader.get("antenna").tileIdx(0), {
+            xAnchor: 0.5,
+            yAnchor: 0.5,
+            xOffset: -36,
+            yOffset: 205
+        }));
+        this.addComponent(new Sprite(Game.resourceLoader.get("antenna_active").tileIdx(0), {
+            xAnchor: 0.5,
+            yAnchor: 1,
+            xOffset: -36,
+            yOffset: 205
+        }));
+
+        this.addComponent(
+            new TextDisp(-16, 205, `+${LD59.ANTS.size * 50}  (${LD59.ANTS.size} x 50)`, {
+                fontFamily: "retro",
+                fill: Palette.CREAM,
+                fontSize: 10,
+            }),
+        ).pixiObj.anchor.set(0, 0.5);
+
+        this.addComponent(
+            new TextDisp(0, 228, `Your Score: ${this.score}`, {
+                fontFamily: "retro",
+                fill: Palette.CREAM,
+                fontSize: 10,
             }),
         ).pixiObj.anchor.set(0.5);
 
+        LD59.STATE = GameState.Win;
+
         this.addComponent(
-            new TextDisp(0, 89, `Press Space to Restart`, {
+            new TextDisp(0, 248, `Press Space to go to\nnext level or R to restart `, {
                 fontFamily: "retro",
-                fill: 0xe2a97e,
-                fontSize: 4,
+                fill: Palette.PINK,
+                fontSize: 8,
+                align: "center",
             }),
         ).pixiObj.anchor.set(0.5);
 
         if (!this.submitSuccess) {
             this.addComponent(
-                new TextDisp(0, 73, "Failed to submit score", {
+                new TextDisp(0, 166, "Failed to submit score", {
                     fontFamily: "retro",
-                    fill: 0xe2a97e,
-                    fontSize: 3,
+                    fill: Palette.PINK,
+                    fontSize: 6,
                 }),
             ).pixiObj.anchor.set(0.5);
         }
@@ -211,37 +245,37 @@ export class HighScores extends Entity {
         getScores().then((scores) => {
             if (scores === null) {
                 this.addComponent(
-                    new TextDisp(0, 41, "Error\nFetching Scores", {
+                    new TextDisp(0, 102, "Error\nFetching Scores", {
                         fontFamily: "retro",
-                        fill: 0xf6edcd,
+                        fill: Palette.CREAM,
                         align: "center",
-                        fontSize: 5,
+                        fontSize: 10,
                     }),
                 ).pixiObj.anchor.set(0.5);
                 return;
             }
 
-            let yoff = 18;
+            let yoff = 56;
             scores.forEach((score) => {
                 this.addComponent(
-                    new TextDisp(-35, yoff, score.name, {
+                    new TextDisp(-70, yoff, score.name, {
                         fontFamily: "retro",
-                        fill: 0xf6edcd,
-                        fontSize: 5,
+                        fill: Palette.CREAM,
+                        fontSize: 10,
                     }),
                 );
 
                 this.addComponent(
-                    new TextDisp(5, yoff, score.score.toString(), {
+                    new TextDisp(10, yoff, score.score.toString(), {
                         fontFamily: "retro",
                         align: "left",
 
-                        fill: 0xf6edcd,
-                        fontSize: 5,
+                        fill: Palette.CREAM,
+                        fontSize: 10,
                     }),
                 );
 
-                yoff += 5;
+                yoff += 10;
             });
         });
     }

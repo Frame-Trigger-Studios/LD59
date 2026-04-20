@@ -110,8 +110,8 @@ class MainScene extends Scene {
         }
 
         const mouse = this.addEntity(new MouseTracker("mouse", 0, 0, Layers.ANT_PLACER));
-        this.addGUIEntity(new AntennaDisp(LD59.GAME_WIDTH - 30, 55));
-        this.addGUIEntity(new GameTimer(LD59.GAME_WIDTH - 30, 25));
+        this.addGUIEntity(new AntennaDisp(LD59.GAME_WIDTH - 112, 8));
+        this.addGUIEntity(new GameTimer(LD59.GAME_WIDTH - 64, 8));
 
         if (LD59.STATE == GameState.AutoStart) {
             this.addGlobalSystem(new GameTimerSystem());
@@ -224,7 +224,8 @@ export enum GameState {
     Planning,
     Game,
     Dead,
-    Win
+    Win,
+    Scoring
 }
 
 export class LD59 extends Game {
