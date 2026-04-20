@@ -83,8 +83,12 @@ export class Antenna extends Entity {
             // Set the outline alpha
             const alpha = Math.max(0, Math.min(0.3 * (1 - (dist - 100) / 50), 0.3));
 
+            const music = Game.resourceLoader.getSound("music");
+
+            const fade_distance = 50;
+
             // Check outer range for fade in
-            if (dist < Antenna.ANT_DIST + 50) {
+            if (dist < Antenna.ANT_DIST + fade_distance) {
                 outline.setStyle({lineAlpha: alpha});
                 rotator.connected = false;
 
@@ -92,6 +96,12 @@ export class Antenna extends Entity {
                 if (dist < Antenna.ANT_DIST) {
                     rotator.connected = true;
                     rotator.radDir = MathUtil.degToRad(90) + MathUtil.pointDirection(player.transform.x, player.transform.y, caller.parent.transform.x, caller.parent.transform.y);
+                } else if (!player.getComponent<Connected>(Connected)?.isConnected) {
+                    const scale_length = 10;
+                    const amount_outside = dist - Antenna.ANT_DIST;
+                    const volume_scale = Math.floor((amount_outside / (fade_distance/scale_length))) + 1;
+                    const increment = LD59.musicVolume / scale_length;
+                    music.volume = LD59.musicVolume - (increment * volume_scale);
                 }
             } else {
                 rotator.connected = false;
@@ -290,6 +300,7 @@ export class AntennaRotator extends GlobalSystem<[RotateToPlayerSprite[]]> {
         if (player === null || connected === null) {
             return;
         }
+        const previous_connected = connected!.isConnected;
         connected!.isConnected = false;
         this.runOnComponents(sprites => {
             sprites.forEach(sprite => {
@@ -304,5 +315,9 @@ export class AntennaRotator extends GlobalSystem<[RotateToPlayerSprite[]]> {
                 }
             })
         })
+
+        if (!previous_connected && connected!.isConnected) {
+            LD59.restore_music();
+        }
     }
 }

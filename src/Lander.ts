@@ -153,6 +153,7 @@ export class Lander extends Entity {
             this.winMsg();
             LD59.audio.stop("thrusters");
             LD59.audio.play("landed", false);
+            LD59.restore_music();
 
             this.scene.getGlobalSystem<GameTimerSystem>(GameTimerSystem)?.destroy();
             caller.destroy();
@@ -181,6 +182,7 @@ export class Lander extends Entity {
         caller.destroy();
         LD59.STATE = GameState.Dead;
         this.deadMsg(caller.getScene());
+        LD59.restore_music();
 
         caller.parent.addComponent(new Timer(100, null)).onTrigger.register(() => {
             const debrisTex = Game.resourceLoader.get("lander_broken")

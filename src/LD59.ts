@@ -234,6 +234,8 @@ export class LD59 extends Game {
         await Game.resourceLoader.autoLoad();
         Log.info("loaded all resources");
         LD59.audio.startMusic("music", true);
+        LD59.musicVolume = Game.resourceLoader.getSound("music").volume;
+        LD59.music = Game.resourceLoader.getSound("music");
     };
 
     static STATE = GameState.Planning;
@@ -245,6 +247,8 @@ export class LD59 extends Game {
 
     static muted = false;
     static musicPlaying = false;
+    static musicVolume = 0.2;
+    static music = null;
 
     constructor() {
         super({
@@ -256,5 +260,17 @@ export class LD59 extends Game {
 
         // Set the global log level
         Log.logLevel = LogLevel.INFO;
+    }
+
+    static restore_music() {
+        const music = Game.resourceLoader.getSound("music");
+
+        if (music.volume != LD59.musicVolume) {
+            music.volume = LD59.musicVolume;
+            console.log("Set music volume");
+        }
+        if (!music.isPlaying) {
+            music.play();
+        }
     }
 }
