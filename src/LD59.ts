@@ -68,14 +68,12 @@ class TitleScene extends Scene {
 }
 
 class MainScene extends Scene {
-    static sound: SoundManager
 
     onAdded() {
         super.onAdded();
 
         SatCollisionSystem.DEBUG_DRAW = false;
 
-        MainScene.sound = this.addGUIEntity(new SoundManager());
         this.addGUIEntity(new SoundManager());
         this.addGlobalSystem(new TimerSystem());
         this.addGlobalSystem(new ScreenShaker(LD59.GAME_WIDTH / 2, LD59.GAME_HEIGHT / 2));
@@ -126,8 +124,7 @@ class MainScene extends Scene {
         }, [Key.BracketLeft]));
         this.addSystem(new ActionOnPress(() => {
             LD59.CURRENT_LEVEL += 1;
-            // TODO adjust to number of levels
-            if (LD59.CURRENT_LEVEL > 15) LD59.CURRENT_LEVEL = 15;
+            if (LD59.CURRENT_LEVEL > 11) LD59.CURRENT_LEVEL = 11;
             LD59.ANTS.clear();
             LD59.STATE = GameState.Planning;
             this.game.setScene(new MainScene(this.game));

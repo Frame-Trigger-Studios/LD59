@@ -4,16 +4,16 @@ import {GameState, LD59, Palette} from "../LD59";
 // TODO make this more generic
 // TODO update values before use
 // TODO check the colours
-const submitUrl = "https://quackqack.pythonanywhere.com/GAME/submit";
-const leaderboardUrl = "https://quackqack.pythonanywhere.com/leaderboard"
-const secret = "";
+const submitUrl = "https://quackqack.pythonanywhere.com/submit?level=";
+const leaderboardUrl = "https://quackqack.pythonanywhere.com/leaderboard?level="
+const secret = "lol_this_is_very_secure_obviously";
 
 export async function submitScore(name: string, score: number) {
 
     const hash = await sha256(score + secret);
 
     try {
-        const resp = await fetch(submitUrl, {
+        const resp = await fetch(submitUrl + LD59.CURRENT_LEVEL, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({name, score, hash}),
@@ -34,7 +34,7 @@ async function sha256(message: string) {
 
 export async function getScores(): Promise<Score[] | null> {
     try {
-        const resp = await fetch(leaderboardUrl, {
+        const resp = await fetch(leaderboardUrl + LD59.CURRENT_LEVEL, {
             signal: AbortSignal.timeout(5000),
         });
         if (!resp.ok) {
@@ -266,7 +266,7 @@ export class HighScores extends Entity {
                 );
 
                 this.addComponent(
-                    new TextDisp(10, yoff, score.score.toString(), {
+                    new TextDisp(10, yoff, score.score.toFixed(2), {
                         fontFamily: "retro",
                         align: "left",
 

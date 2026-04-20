@@ -240,7 +240,7 @@ export class Lander extends Entity {
                     }
                 });
 
-                if (resp === null || (resp.length == 10 && score < resp[9].score)) {
+                if (resp === null || (resp.length == 10 && score > resp[9].score)) {
                     this.scene.addGUIEntity(new HighScores(score, (time_ms / 1000), true))
                 } else {
                     // new high score
