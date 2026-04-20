@@ -8,7 +8,7 @@ class MuteListener extends System<[AnimatedSpriteController, MuteComp]> {
 
     runOnEntities(delta: number, e: Entity, spr: AnimatedSpriteController, args_1: MuteComp): void {
         if (Game.mouse.isButtonPressed(Button.LEFT)) {
-            const pos = Game.mouse.canvasPos();
+            const pos = Game.mouse.canvasPos().divide(2);
             if (pos.x >= Game.GAME_WIDTH - 24 && pos.x <= Game.GAME_WIDTH - 8 && pos.y >= Game.GAME_HEIGHT - 24 && pos.y <= Game.GAME_HEIGHT - 8) {
                 Game.audio.toggleMuted();
                 spr.setAnimation(Number(Game.audio.muted));

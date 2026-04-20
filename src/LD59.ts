@@ -68,14 +68,12 @@ class TitleScene extends Scene {
 }
 
 class MainScene extends Scene {
-    static sound: SoundManager
 
     onAdded() {
         super.onAdded();
 
         SatCollisionSystem.DEBUG_DRAW = false;
 
-        MainScene.sound = this.addGUIEntity(new SoundManager());
         this.addGUIEntity(new SoundManager());
         this.addGlobalSystem(new TimerSystem());
         this.addGlobalSystem(new ScreenShaker(LD59.GAME_WIDTH / 2, LD59.GAME_HEIGHT / 2));
