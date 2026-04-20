@@ -21,6 +21,7 @@ import {
 import {GameState, Layers, LD59} from "./LD59";
 import {GameTimerSystem, TimerText} from "./scoring/Scoring";
 import {getScores, HighScores, SubmitScore} from "./util/HighScores";
+import {Instr} from "./LevelLoad";
 
 
 class Phys {
@@ -218,10 +219,8 @@ export class Lander extends Entity {
                 entity.destroy()
             }
         });
-        const txt = scene.getEntityWithName("main_text")?.getComponent<TextDisp>(TextDisp);
-        if (txt) {
-            txt.text = "Ouch! Press Space to restart or E to edit"
-        }
+        scene.addGUIEntity(new Instr(LD59.GAME_WIDTH / 2, LD59.GAME_HEIGHT / 2, "Ouch! Press Space to restart or E to edit", 14, true))
+
     }
 
     private winMsg() {
