@@ -194,6 +194,9 @@ export class LevelLoader
                 case 29:
                     this.scene.addGUIEntity(new Instr(x, y + 16, "Press R to quick restart", 8));
                     break;
+                case 30:
+                    this.scene.addGUIEntity(new Instr(x, y + 16, "Thanks for playing!\n\nYou can use the '[' and ']' keys to cycle\nbetween levels to play them again", 14, true));
+                    break;
                 case 31:
                     this.scene.addGUIEntity(new Instr(x, y + 16, "This is the last level!\n\nYou can use the '[' and ']' keys to cycle\nbetween levels to play them again", 8));
                     break;

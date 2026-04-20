@@ -124,7 +124,7 @@ class MainScene extends Scene {
         }, [Key.BracketLeft]));
         this.addSystem(new ActionOnPress(() => {
             LD59.CURRENT_LEVEL += 1;
-            if (LD59.CURRENT_LEVEL > 10) LD59.CURRENT_LEVEL = 10;
+            if (LD59.CURRENT_LEVEL > 11) LD59.CURRENT_LEVEL = 11;
             LD59.ANTS.clear();
             LD59.STATE = GameState.Planning;
             this.game.setScene(new MainScene(this.game));
