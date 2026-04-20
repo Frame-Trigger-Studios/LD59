@@ -109,12 +109,14 @@ export class Lander extends Entity {
                 LD59.audio.stop("thrusters");
                 fireSpr.setAnimation(0, false);
                 landerSpr.setAnimation(0, false);
-                LD59.audio.play("out_of_range");
+                // LD59.audio.play("out_of_range");
+                LD59.audio.stop("in_range");
 
                 return;
             }
             landerSpr.setAnimation(1, false);
-            LD59.audio.stop("out_of_range");
+            // LD59.audio.stop("out_of_range");
+            LD59.audio.play("in_range");
 
             if (Game.keyboard.isKeyDown(Key.KeyA)) {
                 body.rotate(MathUtil.degToRad(delta * -Phys.ROT_SPEED));
@@ -148,6 +150,7 @@ export class Lander extends Entity {
             }
             LD59.STATE = GameState.Win;
             this.winMsg(caller.getScene());
+            LD59.audio.stop("thrusters");
             LD59.audio.play("landed", false);
 
             this.scene.getGlobalSystem<GameTimerSystem>(GameTimerSystem)?.destroy();
