@@ -134,6 +134,21 @@ class MainScene extends Scene {
             this.addGlobalSystem(new GameTimerSystem());
         }
 
+        // TODO DELETE DEBUG
+        this.addSystem(new ActionOnPress(() => {
+            LD59.CURRENT_LEVEL -= 1;
+            if (LD59.CURRENT_LEVEL < 0) LD59.CURRENT_LEVEL = 0;
+            LD59.ANTS.clear();
+            LD59.STATE = GameState.Planning;
+            this.game.setScene(new MainScene(this.game));
+        }, [Key.BracketLeft]));
+        this.addSystem(new ActionOnPress(() => {
+            LD59.CURRENT_LEVEL += 1;
+            LD59.ANTS.clear();
+            LD59.STATE = GameState.Planning;
+            this.game.setScene(new MainScene(this.game));
+        }, [Key.BracketRight]))
+
         this.addSystem(new ActionOnPress(() => {
             switch (LD59.STATE) {
                 // This transitions Planning -> Game

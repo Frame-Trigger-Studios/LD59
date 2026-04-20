@@ -142,6 +142,10 @@ export class Lander extends Entity {
 
             // It's kinda funny to launch across the map and land on the pad
             Log.info("SAFE")
+            if (LD59.STATE === GameState.Dead) {
+                // Stop double collision triggers
+                return;
+            }
             LD59.STATE = GameState.Win;
             this.winMsg(caller.getScene());
             LD59.audio.play("landed", false);
@@ -156,6 +160,10 @@ export class Lander extends Entity {
         col.onTriggerWithLayer(Layers.SOLIDS, (caller, data) => {
 
             // DEAD
+            if (LD59.STATE === GameState.Win) {
+                // Stop double collision triggers
+                return;
+            }
             this.crashLander(caller);
         });
     }
