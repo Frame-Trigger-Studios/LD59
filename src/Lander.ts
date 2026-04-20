@@ -11,7 +11,8 @@ import {
     MathUtil,
     Rigidbody,
     SatCollider,
-    Scene, ScreenShake, ScreenShaker,
+    Scene,
+    ScreenShake,
     SimplePhysicsBody,
     Sprite,
     TextDisp,
@@ -22,9 +23,9 @@ import {GameTimerSystem, Score, ScoreDisplay, TimerText} from "./scoring/Scoring
 
 
 class Phys {
-    static GRAVITY = 0.000015;
+    static GRAVITY = 0.000012;
     static ROT_SPEED = 0.0008;
-    static THRUST = 0.00004;
+    static THRUST = 0.00005;
 }
 
 export class LanderPlaceholder extends Entity {
@@ -138,21 +139,13 @@ export class Lander extends Entity {
 
         const col = this.addComponent(new CircleSatCollider({layer: Layers.SHIP, radius: 5}));
         col.onTriggerWithLayer(Layers.PAD, (caller, data) => {
-            // Check if it was a safe landing or not.
-            const ang = Math.abs(caller.parent.transform.angle % 360);
 
-            // It's kinda funny to launch across the map and land on the pad, maybe we remove the checks and any landing
-            // is safe?
-            if (ang < 45) {
-                Log.info("SAFE")
-                LD59.STATE = GameState.Win;
-                this.winMsg(caller.getScene());
-                LD59.audio.play("landed", false);
+            // It's kinda funny to launch across the map and land on the pad
+            Log.info("SAFE")
+            LD59.STATE = GameState.Win;
+            this.winMsg(caller.getScene());
+            LD59.audio.play("landed", false);
 
-            } else {
-                Log.info("Angle too extreme", ang);
-                this.crashLander(caller);
-            }
             this.scene.getGlobalSystem<GameTimerSystem>(GameTimerSystem)?.destroy();
             caller.destroy();
             caller.parent.getComponent(Rigidbody)?.destroy();
