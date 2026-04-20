@@ -232,6 +232,7 @@ export class LD59 extends Game {
     resourceLoad = async () => {
         await Game.resourceLoader.autoLoad();
         Log.info("loaded all resources");
+        LD59.audio.startMusic("music", true);
     };
 
     static STATE = GameState.Planning;
