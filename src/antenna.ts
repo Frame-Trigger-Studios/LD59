@@ -207,6 +207,18 @@ export class MouseTracker extends Entity {
             }
         });
 
+        c = this.addComponent(new CircleSatCollider({
+            layer: Layers.ANTENNA_PROBING,
+            radius: 5,
+            yOff: 8,
+            xOff: 8
+        }));
+        c.onTrigger.register( (caller, data) => {
+            if (data.other.layer === Layers.SOLIDS || data.other.layer === Layers.PAD) {
+                this.snapDir = null;
+            }
+        });
+
         this.scene.addFnSystem([HoverSprite, HoverSprite2, HoverCircle], (delta, entity, sprite, sprite2, circle) => {
             // TODO engine: fix canvas pos when the game is scaled
             const pos = Game.mouse.canvasPos().divide(2);
@@ -247,7 +259,7 @@ class ClickDetector extends Entity {
         // Antenna exists, delete it.
         const coll = this.addComponent(new CircleSatCollider({radius: 5, layer: Layers.CLICK}));
         coll.onTrigger.register((caller, data) => {
-            if (data.other.layer === Layers.SOLIDS) {
+            if (data.other.layer === Layers.SOLIDS || data.other.layer === Layers.PAD) {
                 this.destroy();
             }
             if (data.other.layer === Layers.ANTENNA_OBJ) {

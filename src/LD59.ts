@@ -26,7 +26,6 @@ export enum Layers {
     BACKGROUND,
     ANT_PLACER,
     ANTENNA_PROBING,
-    LOS_PROBE,
     PAD,
     SHIP,
     EXPLOSION,
@@ -110,22 +109,6 @@ class MainScene extends Scene {
             }
         }
 
-        const text = this.addGUIEntity(new Entity("title", 0, 0, Layers.GUI));
-        text.addComponent(
-            new TextDisp(Game.GAME_WIDTH / 2, 20, "Click to Add an Antenna", {
-                fontFamily: "retro",
-                fill: 0xffffff,
-            }),
-        ).pixiObj.anchor.set(0.5);
-
-        text.addComponent(
-            new TextDisp(Game.GAME_WIDTH / 2, Game.GAME_HEIGHT - 20, "Press Space to Start", {
-                fontFamily: "retro",
-                fill: 0xffffff,
-                align: "center"
-            }),
-        ).pixiObj.anchor.set(0.5);
-
         const mouse = this.addEntity(new MouseTracker("mouse", 0, 0, Layers.ANT_PLACER));
         this.addGUIEntity(new AntennaDisp(LD59.GAME_WIDTH - 30, 55));
         this.addGUIEntity(new GameTimer(LD59.GAME_WIDTH - 30, 25));
@@ -134,16 +117,17 @@ class MainScene extends Scene {
             this.addGlobalSystem(new GameTimerSystem());
         }
 
-        // TODO DELETE DEBUG
         this.addSystem(new ActionOnPress(() => {
             LD59.CURRENT_LEVEL -= 1;
-            if (LD59.CURRENT_LEVEL < 0) LD59.CURRENT_LEVEL = 0;
+            if (LD59.CURRENT_LEVEL <= 0) LD59.CURRENT_LEVEL = 1;
             LD59.ANTS.clear();
             LD59.STATE = GameState.Planning;
             this.game.setScene(new MainScene(this.game));
         }, [Key.BracketLeft]));
         this.addSystem(new ActionOnPress(() => {
             LD59.CURRENT_LEVEL += 1;
+            // TODO adjust to number of levels
+            if (LD59.CURRENT_LEVEL > 15) LD59.CURRENT_LEVEL = 15;
             LD59.ANTS.clear();
             LD59.STATE = GameState.Planning;
             this.game.setScene(new MainScene(this.game));
@@ -154,11 +138,14 @@ class MainScene extends Scene {
                 // This transitions Planning -> Game
                 case GameState.Planning:
                     this.getEntityWithName("lander_placeholder")?.destroy();
-                    text.destroy();
                     mouse.destroy();
 
                     this.addGlobalSystem(new GameTimerSystem());
                     LD59.STATE = GameState.Game;
+                    const txt = this.getEntityWithName("main_text")?.getComponent<TextDisp>(TextDisp);
+                    if (txt) {
+                        txt.text = ""
+                    }
                     break
                 // Transition from Dead -> Restart (skip planning)
                 case GameState.Dead:
@@ -208,8 +195,9 @@ class MainScene extends Scene {
         matrix.addCollision(Layers.SHIP, Layers.PAD);
         matrix.addCollision(Layers.CLICK, Layers.ANTENNA_OBJ);
         matrix.addCollision(Layers.CLICK, Layers.SOLIDS);
+        matrix.addCollision(Layers.CLICK, Layers.PAD);
         matrix.addCollision(Layers.SOLIDS, Layers.ANTENNA_PROBING);
-        matrix.addCollision(Layers.SOLIDS, Layers.LOS_PROBE);
+        matrix.addCollision(Layers.PAD, Layers.ANTENNA_PROBING);
 
         this.addGlobalSystem(new SatCollisionSystem(matrix));
         this.addGlobalSystem(new AntennaRotator());
@@ -219,9 +207,12 @@ class MainScene extends Scene {
 
         if (LD59.STATE === GameState.AutoStart) {
             this.getEntityWithName("lander_placeholder")?.destroy();
-            text.destroy();
             mouse.destroy();
             LD59.STATE = GameState.Game;
+            const txt = this.getEntityWithName("main_text")?.getComponent<TextDisp>(TextDisp);
+            if (txt) {
+                txt.text = ""
+            }
         }
 
         // Game.audio.startMusic("music", true);

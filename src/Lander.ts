@@ -212,12 +212,10 @@ export class Lander extends Entity {
     }
 
     private deadMsg(scene: Scene) {
-        scene.addGUIEntity(new Entity("retryinstr")).addComponent(
-            new TextDisp(Game.GAME_WIDTH / 2, 60, "Ouch\nPress Space to restart\nor E to edit antenna placement", {
-                fontFamily: "retro",
-                fill: 0xffffff,
-            }),
-        ).pixiObj.anchor.set(0.5);
+        const txt = scene.getEntityWithName("main_text")?.getComponent<TextDisp>(TextDisp);
+        if (txt) {
+            txt.text = "Ouch! Press Space to restart or E to edit antennas"
+        }
 
         const score = this.scene.addGUIEntity(new Score(LD59.GAME_WIDTH / 2, LD59.GAME_HEIGHT / 2));
         const time_ms = this.scene.getEntityWithName("level_time")?.getComponent<TimerText>(TimerText)?.time_ms;

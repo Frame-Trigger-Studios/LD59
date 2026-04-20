@@ -151,6 +151,8 @@ export class LevelLoader
 
         const loader = new TiledMapLoader(levels as TiledMap);
 
+        this.scene.addGUIEntity(new Instr(LD59.GAME_WIDTH / 2, 6, "Press Space To Start", 12 ,true, "main_text"))
+
         loader.loadFn(`Level${this.levelId}`, (tileId, x, y) => {
             tileId = tileId - 1;
             x = x + 8;
@@ -172,7 +174,7 @@ export class LevelLoader
                     this.scene.addEntity(new LandingPad(x, y, tileId - 32));
                     break;
                 case 2:
-                    this.scene.addGUIEntity(new Instr(x, y + 12, "Click next to a wall\nto place an antenna\n\nThe lander needs to be in \nrange to be controllable"));
+                    this.scene.addGUIEntity(new Instr(x, y + 12, "Click next to a wall\nto place an antenna\n\nThe lander needs to be in \nrange to be controllable\n\n\n\nPress Space to start\n\n\n\nUse WASD to control the lander", 8));
                     break;
                 case 1:
                     this.scene.addGUIEntity(new Instr(x, y + 12, "Aim for the  ↑\nlanding pad"));
@@ -189,6 +191,12 @@ export class LevelLoader
                 case 28:
                     this.scene.addGUIEntity(new Instr(x, y + 16, "You don't have to\nland slowly\n\n   ...or upright", 8));
                     break;
+                case 29:
+                    this.scene.addGUIEntity(new Instr(x, y + 16, "Press R to quick restart", 8));
+                    break;
+                case 31:
+                    this.scene.addGUIEntity(new Instr(x, y + 16, "This is the last level!\n\nYou can use the '[' and ']' keys to cycle\nbetween levels to play them again", 8));
+                    break;
                 default:
                     this.scene.addEntity(new Tile(tileId, x, y));
                     break;
@@ -204,17 +212,20 @@ export class LevelLoader
     }
 }
 
-class Instr extends Entity {
-    constructor(x: number, y: number, readonly text: string, readonly size = 12) {
-        super("instr", x, y, Layers.GUI);
+export class Instr extends Entity {
+    constructor(x: number, y: number, readonly text: string, readonly size = 12, readonly centre = false, name = "instr") {
+        super(name, x, y, Layers.GUI);
     }
 
     onAdded() {
         super.onAdded();
-        this.addComponent(new TextDisp(0, 0, this.text, {
+        const txt = this.addComponent(new TextDisp(0, 0, this.text, {
             fontFamily: "retro",
             fill: Palette.CREAM,
-            fontSize: this.size
-        }))
+            fontSize: this.size,
+        }));
+        if (this.centre) {
+            txt.pixiObj.anchor.set(0.5);
+        }
     }
 }
