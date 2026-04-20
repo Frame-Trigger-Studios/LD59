@@ -126,8 +126,7 @@ class MainScene extends Scene {
         }, [Key.BracketLeft]));
         this.addSystem(new ActionOnPress(() => {
             LD59.CURRENT_LEVEL += 1;
-            // TODO adjust to number of levels
-            if (LD59.CURRENT_LEVEL > 15) LD59.CURRENT_LEVEL = 15;
+            if (LD59.CURRENT_LEVEL > 10) LD59.CURRENT_LEVEL = 10;
             LD59.ANTS.clear();
             LD59.STATE = GameState.Planning;
             this.game.setScene(new MainScene(this.game));
