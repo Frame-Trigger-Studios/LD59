@@ -29,8 +29,9 @@ export enum Layers {
     PAD,
     SHIP,
     EXPLOSION,
-    ANTENNA_OBJ,
+    ANTENNA_LINE,
     SOLIDS,
+    ANTENNA_OBJ,
     DEBRIS,
     CLICK,
     GUI

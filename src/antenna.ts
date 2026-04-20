@@ -23,6 +23,7 @@ import {AntennaDisp, NumAntennas} from "./scoring/Scoring";
 export class RotateToPlayerSprite extends AnimatedSpriteController {
     radDir = 0;
     connected = false;
+    lineComp: RenderInRange | null = null;
 }
 
 class Probe extends PolySatCollider {
@@ -35,6 +36,7 @@ class RenderInRange extends RenderCircle {
 export class Antenna extends Entity {
 
     static ANT_DIST = 100;
+    outlineE: Entity | null = null;
 
     constructor(x: number, y: number, readonly rot: number) {
         super("antenna", x, y, Layers.ANTENNA_OBJ);
@@ -69,12 +71,19 @@ export class Antenna extends Entity {
             }]));
         this.addComponent(new CircleSatCollider({layer: Layers.ANTENNA_OBJ, radius: 8}))
 
-        const outline = this.addComponent(new RenderInRange({radius: Antenna.ANT_DIST}));
+        this.outlineE = this.scene.addEntity(new Entity("antline", this.transform.x, this.transform.y , Layers.ANTENNA_LINE));
+        const outline = this.outlineE.addComponent(new RenderInRange({radius: Antenna.ANT_DIST}));
         outline.setStyle({lineColour: Palette.PINK, lineAlpha: 0.5});
+        rotator.lineComp = outline;
+    }
+
+    onRemoved() {
+        super.onRemoved();
+        this.outlineE?.destroy();
     }
 }
 
-export class ProxDetector extends System<[RotateToPlayerSprite, RenderInRange]> {
+export class ProxDetector extends System<[RotateToPlayerSprite]> {
 
     music = Game.resourceLoader.getSound("music");
     vol: number | null = null;
@@ -85,14 +94,18 @@ export class ProxDetector extends System<[RotateToPlayerSprite, RenderInRange]> 
         this.vol = null;
         super.update(delta);
         if (this.vol !== null) {
-            this.music.volume = this.vol
+            this.music.volume = Math.max(this.vol, 0.008);
         }
     }
 
-    runOnEntities(delta: number, entity: Entity, rotator: RotateToPlayerSprite, outline: RenderInRange): void {
+    runOnEntities(delta: number, entity: Entity, rotator: RotateToPlayerSprite): void {
 
         const player = entity.getScene().getEntityWithName("lander");
         if (player === null) {
+            return;
+        }
+        const outline = rotator.lineComp;
+        if (outline === null) {
             return;
         }
 
@@ -129,7 +142,7 @@ export class ProxDetector extends System<[RotateToPlayerSprite, RenderInRange]> 
 
     }
 
-    types: [CType<RotateToPlayerSprite>, CType<RenderInRange>] = [RotateToPlayerSprite, RenderInRange];
+    types: [CType<RotateToPlayerSprite>] = [RotateToPlayerSprite];
 
 }
 
