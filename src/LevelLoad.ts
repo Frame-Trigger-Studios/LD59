@@ -1,8 +1,18 @@
-import {Entity, Game, MathUtil, PolySatCollider, RectSatCollider, Sprite, TiledMap, TiledMapLoader} from "lagom-engine";
+import {
+    Entity,
+    Game,
+    MathUtil,
+    PolySatCollider,
+    RectSatCollider,
+    Sprite,
+    TextDisp,
+    TiledMap,
+    TiledMapLoader
+} from "lagom-engine";
 import levels from "./assets/Levels.json";
 import {LanderPlaceholder} from "./Lander";
 import {LandingPad} from "./LandingPad";
-import {Layers, LD59} from "./LD59";
+import {Layers, LD59, Palette} from "./LD59";
 import {Antenna} from "./antenna";
 
 export class Tile extends Entity {
@@ -161,6 +171,24 @@ export class LevelLoader
                     // Landing pad
                     this.scene.addEntity(new LandingPad(x, y, tileId - 32));
                     break;
+                case 2:
+                    this.scene.addGUIEntity(new Instr(x, y + 12, "Click next to a wall\nto place an antenna\n\nThe lander needs to be in \nrange to be controllable"));
+                    break;
+                case 1:
+                    this.scene.addGUIEntity(new Instr(x, y + 12, "Aim for the  ↑\nlanding pad"));
+                    break;
+                case 6:
+                    this.scene.addGUIEntity(new Instr(x - 140, y - 64, "You can only\nplace an antenna\non a flat surface"));
+                    break;
+                case 19:
+                    this.scene.addGUIEntity(new Instr(x + 8, y + 16, "    Faster\n    = More Points\n\nFewer Antennas\n= Even More Points", 8));
+                    break;
+                case 18:
+                    this.scene.addGUIEntity(new Instr(x + 12, y + 16, "Click an antenna\nagain to remove it"));
+                    break;
+                case 28:
+                    this.scene.addGUIEntity(new Instr(x, y + 16, "You don't have to\nland slowly\n\n   ...or upright", 8));
+                    break;
                 default:
                     this.scene.addEntity(new Tile(tileId, x, y));
                     break;
@@ -173,5 +201,20 @@ export class LevelLoader
         })
 
         this.destroy();
+    }
+}
+
+class Instr extends Entity {
+    constructor(x: number, y: number, readonly text: string, readonly size = 12) {
+        super("instr", x, y, Layers.GUI);
+    }
+
+    onAdded() {
+        super.onAdded();
+        this.addComponent(new TextDisp(0, 0, this.text, {
+            fontFamily: "retro",
+            fill: Palette.CREAM,
+            fontSize: this.size
+        }))
     }
 }
