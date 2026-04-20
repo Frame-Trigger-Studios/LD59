@@ -1,5 +1,5 @@
 import {Component, Entity, Game, GlobalSystem, LagomType, Sprite, TextDisp} from "lagom-engine";
-import {Layers, LD59} from "../LD59";
+import {Layers, LD59, Palette} from "../LD59";
 
 export class GameTimer extends Entity {
     timeTextComponent!: Component;
@@ -14,22 +14,20 @@ export class GameTimer extends Entity {
         this.addComponent(new Sprite(Game.resourceLoader.get("stopwatch").tileIdx(0), {
             xAnchor: 0.5,
             yAnchor: 0.5,
-            xOffset: 13,
-            yOffset: -8
         }));
     }
 }
 
 export class TimerText extends TextDisp {
-    time_ms: number;
+    time_ms: number = 0;
 
     constructor() {
-        super(0, 0, "0", {
+        super(10, -2, "0", {
             fontFamily: "retro",
-            fill: 0xffffff,
+            fontSize: 12,
+            fill: Palette.PINK,
         });
-        this.time_ms = 0;
-        this.pixiObj.anchor.set(1, 1);
+        this.pixiObj.anchor.set(0, 0.5);
     }
 
     reset() {
@@ -43,7 +41,7 @@ export class TimerText extends TextDisp {
     }
 
     setText() {
-        this.text = `${(this.time_ms / 1000).toFixed(0)}`
+        this.text = `${(this.time_ms / 1000).toFixed(2)}`
     }
 }
 
@@ -68,14 +66,11 @@ export class AntennaDisp extends Entity {
         this.addComponent(new Sprite(Game.resourceLoader.get("antenna").tileIdx(0), {
             xAnchor: 0.5,
             yAnchor: 0.5,
-            xOffset: 12,
-            yOffset: -8
         }));
-        this.addComponent(new Sprite(Game.resourceLoader.get("antenna").tileIdx(1), {
+        this.addComponent(new Sprite(Game.resourceLoader.get("antenna_active").tileIdx(0), {
             xAnchor: 0.5,
-            yAnchor: 0.5,
-            xOffset: 12,
-            yOffset: -10
+            yAnchor: 1,
+            yOffset: 4
         }));
     }
 }
@@ -83,11 +78,12 @@ export class AntennaDisp extends Entity {
 export class NumAntennas extends TextDisp {
 
     constructor() {
-        super(0, 0, "0", {
+        super(10, -2, "0", {
             fontFamily: "retro",
-            fill: 0xffffff,
+            fontSize: 12,
+            fill: Palette.PINK,
         });
-        this.pixiObj.anchor.set(1, 1);
+        this.pixiObj.anchor.set(0, 0.5);
     }
 
     update_antennas() {
@@ -104,11 +100,12 @@ export class Score extends Entity {
     onAdded() {
         super.onAdded();
         this.addComponent(
-            new TextDisp(0, 0, "You scored:", {
+            new TextDisp(0, -2, "You scored:", {
                 fontFamily: "retro",
-                fill: 0xffffff,
+                fontSize: 12,
+                fill: Palette.PINK,
             }),
-        ).pixiObj.anchor.set(0.5);
+        ).pixiObj.anchor.set(0, 0.5);
         this.addComponent(new ScoreDisplay(30));
 
     }

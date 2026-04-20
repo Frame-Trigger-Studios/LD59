@@ -214,13 +214,7 @@ export class Lander extends Entity {
     private deadMsg(scene: Scene) {
         const txt = scene.getEntityWithName("main_text")?.getComponent<TextDisp>(TextDisp);
         if (txt) {
-            txt.text = "Ouch! Press Space to restart or E to edit antennas"
-        }
-
-        const score = this.scene.addGUIEntity(new Score(LD59.GAME_WIDTH / 2, LD59.GAME_HEIGHT / 2));
-        const time_ms = this.scene.getEntityWithName("level_time")?.getComponent<TimerText>(TimerText)?.time_ms;
-        if (time_ms) {
-            score.getComponent<ScoreDisplay>(ScoreDisplay)?.calc_score(time_ms, LD59.ANTS.size);
+            txt.text = "Ouch! Press Space to restart or E to edit"
         }
     }
 
