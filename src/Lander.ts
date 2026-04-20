@@ -19,7 +19,8 @@ import {
     Timer
 } from "lagom-engine";
 import {GameState, Layers, LD59} from "./LD59";
-import {GameTimerSystem, Score, ScoreDisplay, TimerText} from "./scoring/Scoring";
+import {GameTimerSystem, TimerText} from "./scoring/Scoring";
+import {getScores, HighScores, SubmitScore} from "./util/HighScores";
 
 
 class Phys {
@@ -142,12 +143,12 @@ export class Lander extends Entity {
 
             // It's kinda funny to launch across the map and land on the pad
             Log.info("SAFE")
-            if (LD59.STATE === GameState.Dead) {
+            if (LD59.STATE === GameState.Dead || LD59.STATE === GameState.Scoring) {
                 // Stop double collision triggers
                 return;
             }
-            LD59.STATE = GameState.Win;
-            this.winMsg(caller.getScene());
+            LD59.STATE = GameState.Scoring;
+            this.winMsg();
             LD59.audio.play("landed", false);
 
             this.scene.getGlobalSystem<GameTimerSystem>(GameTimerSystem)?.destroy();
@@ -160,7 +161,7 @@ export class Lander extends Entity {
         col.onTriggerWithLayer(Layers.SOLIDS, (caller, data) => {
 
             // DEAD
-            if (LD59.STATE === GameState.Win) {
+            if (LD59.STATE === GameState.Scoring) {
                 // Stop double collision triggers
                 return;
             }
@@ -218,18 +219,26 @@ export class Lander extends Entity {
         }
     }
 
-    private winMsg(scene: Scene) {
-        scene.addGUIEntity(new Entity("retryinstr", 0, 0, Layers.GUI)).addComponent(
-            new TextDisp(Game.GAME_WIDTH / 2, 60, "Nice\nPress Space go to next level\nor R/E to replay", {
-                fontFamily: "retro",
-                fill: 0xffffff,
-            }),
-        ).pixiObj.anchor.set(0.5);
-
-        const score = this.scene.addGUIEntity(new Score(LD59.GAME_WIDTH / 2, LD59.GAME_HEIGHT / 2));
+    private winMsg() {
         const time_ms = this.scene.getEntityWithName("level_time")?.getComponent<TimerText>(TimerText)?.time_ms;
         if (time_ms) {
-            score.getComponent<ScoreDisplay>(ScoreDisplay)?.calc_score(time_ms, LD59.ANTS.size);
+            const score = Math.floor(time_ms / 10) + LD59.ANTS.size * 50;
+
+            getScores().then(resp => {
+
+                this.scene.entities.forEach((entity: Entity) => {
+                    if (entity.name === "instr") {
+                        entity.destroy()
+                    }
+                });
+
+                if (resp === null || (resp.length == 10 && score < resp[9].score)) {
+                    this.scene.addGUIEntity(new HighScores(score, Math.floor(time_ms / 10), true))
+                } else {
+                    // new high score
+                    this.scene.addGUIEntity(new SubmitScore(score, Math.floor(time_ms / 10)));
+                }
+            })
         }
     }
 }

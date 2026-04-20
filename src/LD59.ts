@@ -224,7 +224,8 @@ export enum GameState {
     Planning,
     Game,
     Dead,
-    Win
+    Win,
+    Scoring
 }
 
 export class LD59 extends Game {
