@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Link Drop Leaderboards</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: #eee;
+        padding: 20px;
+        text-align: center; /* center everything */
+    }
+    h1 { margin-bottom: 10px; }
+    .levels {
+        margin-bottom: 20px;
+    }
+    .levels button {
+        margin: 4px;
+        padding: 8px 14px;
+        background: #333;
+        color: #eee;
+        border: 1px solid #555;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+    .levels button:hover {
+        background: #555;
+    }
+    table {
+        margin: 0 auto; /* center table */
+        width: 300px;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    th, td {
+        border: 1px solid #444;
+        padding: 6px;
+        text-align: left;
+    }
+    th {
+        background: #222;
+    }
+</style>
+</head>
+<body>
+
+<h1>Link Drop Leaderboards</h1>
+
+<div class="levels">
+    <script>
+        for (let i = 1; i <= 10; i++) {
+            document.write(`<button onclick="loadLevel(${i})">Level ${i}</button>`);
+        }
+    </script>
+</div>
+
+<h2 id="levelTitle">Level —</h2>
+
+<table id="table" style="display:none;">
+    <thead>
+        <tr><th>Name</th><th>Score</th></tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+</table>
+
+<script>
+async function loadLevel(level) {
+    document.getElementById("levelTitle").textContent = `Level ${level}`;
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+    document.getElementById("table").style.display = "none";
+
+    try {
+        const res = await fetch(`https://quackqack.pythonanywhere.com/leaderboard?level=${level}`);
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+            tbody.innerHTML = `<tr><td colspan="2">Error loading leaderboard</td></tr>`;
+            document.getElementById("table").style.display = "table";
+            return;
+        }
+
+        data.forEach(entry => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${entry.name.toUpperCase()}</td>
+                <td>${Number(entry.score).toFixed(2)}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        document.getElementById("table").style.display = "table";
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="2">Network error</td></tr>`;
+        document.getElementById("table").style.display = "table";
+    }
+}
+
+// Auto-load level 1 on page load
+window.onload = () => loadLevel(1);
+</script>
+
+</body>
+</html>
