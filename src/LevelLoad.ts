@@ -151,6 +151,7 @@ export class LevelLoader
         const loader = new TiledMapLoader(levels as TiledMap);
 
         this.scene.addGUIEntity(new Instr(LD59.GAME_WIDTH / 2, 6, "Press Space To Start", 12 ,true, "main_text"))
+        this.scene.addGUIEntity(new Instr(6 , 0, LD59.CURRENT_LEVEL.toString(), 12 ,false, "main_text"))
 
         loader.loadFn(`Level${this.levelId}`, (tileId, x, y) => {
             tileId = tileId - 1;
