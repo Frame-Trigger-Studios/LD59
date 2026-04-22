@@ -264,7 +264,7 @@ export class LD59 extends Game {
             music.volume = LD59.musicVolume;
             console.log("Set music volume");
         }
-        if (!music.isPlaying) {
+        if (!music.isPlaying && !Game.audio.muted) {
             music.play();
         }
     }
