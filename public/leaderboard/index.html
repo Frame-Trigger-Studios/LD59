@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Link Drop Leaderboards</title>
+    <title>Link Drop Leaderboards</title>
 <style>
     body {
         font-family: Arial, sans-serif;
         background: #111;
         color: #eee;
         padding: 20px;
-        text-align: center; /* center everything */
+        text-align: center;
     }
     h1 { margin-bottom: 10px; }
     .levels {
@@ -28,7 +28,7 @@
         background: #555;
     }
     table {
-        margin: 0 auto; /* center table */
+        margin: 0 auto;
         width: 300px;
         border-collapse: collapse;
         margin-top: 10px;
@@ -41,6 +41,18 @@
     th {
         background: #222;
     }
+    .section {
+    background: #1a1a1a;
+    padding: 10px;
+    border-radius: 6px;
+}
+    #allContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+    padding: 0 20px;
+}
 </style>
 </head>
 <body>
@@ -48,24 +60,37 @@
 <h1>Link Drop Leaderboards</h1>
 
 <div class="levels">
+    <strong>Select Level:</strong><br>
+
+    <!-- Level buttons -->
     <script>
         for (let i = 1; i <= 10; i++) {
             document.write(`<button onclick="loadLevel(${i})">Level ${i}</button>`);
         }
     </script>
+
+    <button onclick="loadAllLevels()">All Levels</button>
 </div>
 
+<!-- Single-level title + table -->
 <h2 id="levelTitle">Level —</h2>
 
-<table id="table" style="display:none;">
-    <thead>
-        <tr><th>Name</th><th>Score</th></tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-</table>
+<div id="singleContainer">
+    <table id="table" style="display:none;">
+        <thead>
+            <tr><th>Name</th><th>Score</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </table>
+</div>
+
+
+<div id="allContainer"></div>
 
 <script>
 async function loadLevel(level) {
+    document.getElementById("allContainer").innerHTML = "";
+
     document.getElementById("levelTitle").textContent = `Level ${level}`;
     const tbody = document.getElementById("tbody");
     tbody.innerHTML = "";
@@ -74,12 +99,6 @@ async function loadLevel(level) {
     try {
         const res = await fetch(`https://quackqack.pythonanywhere.com/leaderboard?level=${level}`);
         const data = await res.json();
-
-        if (!Array.isArray(data)) {
-            tbody.innerHTML = `<tr><td colspan="2">Error loading leaderboard</td></tr>`;
-            document.getElementById("table").style.display = "table";
-            return;
-        }
 
         data.forEach(entry => {
             const row = document.createElement("tr");
@@ -97,8 +116,51 @@ async function loadLevel(level) {
     }
 }
 
-// Auto-load level 1 on page load
-window.onload = () => loadLevel(1);
+async function loadAllLevels() {
+    const container = document.getElementById("allContainer");
+    container.innerHTML = "";
+    document.getElementById("levelTitle").textContent = "All Levels";
+    document.getElementById("table").style.display = "none";
+
+    for (let level = 1; level <= 10; level++) {
+        const section = document.createElement("div");
+        section.className = "section";
+
+        section.innerHTML = `<h2>Level ${level}</h2>`;
+
+        const table = document.createElement("table");
+        const tbody = document.createElement("tbody");
+
+        table.innerHTML = `
+            <thead>
+                <tr><th>Name</th><th>Score</th></tr>
+            </thead>
+        `;
+        table.appendChild(tbody);
+
+        try {
+            const res = await fetch(`https://quackqack.pythonanywhere.com/leaderboard?level=${level}`);
+            const data = await res.json();
+
+            data.forEach(entry => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${entry.name.toUpperCase()}</td>
+                    <td>${Number(entry.score).toFixed(2)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="2">Error loading</td></tr>`;
+        }
+
+        section.appendChild(table);
+        container.appendChild(section);
+    }
+}
+
+// Auto-load all levels
+window.onload = () => loadAllLevels();
 </script>
 
 </body>
